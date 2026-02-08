@@ -49,7 +49,8 @@
     <h1 style="font-size: 1.5rem;">Welcome to Dr. Hayder Al-Kawaz Clinic</h1>
     <div id="welcomeMessage" class="welcome-message"></div>
     <button id="proceedButton" onclick="proceedToMain()">Proceed to Drug Database</button>
-  </div>
+    <button type="button" onclick="logoutUser()" style="background-color: #ff4d4d;">Logout</button>
+</div>
 
   <script>
     // Check if the user is logged in by checking localStorage
@@ -66,6 +67,11 @@
 
     function proceedToMain() {
       window.location.href = "doctorinfo.html"; // Redirect to the Drug Database page
+    }
+    // 1. Remove the specific logged-in user data
+  localStorage.removeItem('loggedInUser');
+    // 3. Redirect the user back to the login page
+  window.location.href = "index.html"; 
     }
   </script>
 </body>
