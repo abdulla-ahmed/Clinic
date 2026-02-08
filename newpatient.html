@@ -12,11 +12,10 @@
     
     label { font-weight: bold; margin-top: 15px; display: block; color: #333; }
     
-    /* Every item in one line with same box size */
     input, select, button { 
       display: block; 
       width: 100%; 
-      max-width: 450px; /* Uniform width for all boxes */
+      max-width: 450px; 
       margin: 8px auto 18px auto; 
       padding: 12px; 
       border-radius: 8px; 
@@ -41,8 +40,8 @@
     <p class="info-note">Only Patient Name is mandatory</p>
     
     <form id="patientForm">
-      <label>Registration Number (Auto)</label>
-      <input type="text" id="regNumber" readonly>
+      <label>Registration Number</label>
+      <input type="text" id="regNumber" readonly style="background-color: #eee;">
 
       <label>Patient Name</label>
       <input type="text" id="patientName" placeholder="Enter Full Name" required>
@@ -77,7 +76,7 @@
       <input type="tel" id="phone" placeholder="Phone Number">
 
       <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
-      <h3>Next of Kin Details</h3>
+      <h3 style="text-align: center;">Next of Kin Details</h3>
 
       <label>Next of Kin Address</label>
       <input type="text" id="kinAddress" placeholder="Kin Address">
@@ -87,11 +86,8 @@
 
       <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
 
-      <label>Date of 1st Visit (Choose from Calendar)</label>
-      <input type="date" id="firstVisitDate">
-
-      <label>Current Entry Date & Time (Automatic)</label>
-      <input type="text" id="entryDateTime" readonly>
+      <label>Entry Date & Time</label>
+      <input type="datetime-local" id="entryDateTime">
 
       <label>Patient Picture</label>
       <input type="file" id="patientPic" accept="image/*" onchange="previewImage(event)">
@@ -114,14 +110,19 @@
       const regId = "AL-" + Math.floor(100000 + Math.random() * 900000);
       document.getElementById('regNumber').value = regId;
 
-      // 2. Set Current Automatic Time
+      // 2. Set Current Date & Time (Editable)
       const now = new Date();
-      document.getElementById('entryDateTime').value = now.toLocaleString();
+      // Format to YYYY-MM-DDTHH:MM for datetime-local input
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
       
-      // 3. Set Default Calendar Date to Today
-      document.getElementById('firstVisitDate').valueAsDate = new Date();
+      const formattedDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+      document.getElementById('entryDateTime').value = formattedDateTime;
 
-      // 4. Generate Barcode
+      // 3. Generate Barcode
       JsBarcode("#barcode", regId, {
         format: "CODE128",
         displayValue: true,
@@ -142,7 +143,7 @@
     function savePatient() {
       const name = document.getElementById('patientName').value;
       if (!name) {
-        alert("At least the Patient's Name must be filled!");
+        alert("Patient Name is required!");
         return;
       }
 
@@ -151,18 +152,23 @@
         name: name,
         age: document.getElementById('age').value,
         sex: document.getElementById('sex').value,
-        firstVisitDate: document.getElementById('firstVisitDate').value,
-        entryTime: document.getElementById('entryDateTime').value,
+        race: document.getElementById('race').value,
+        religion: document.getElementById('religion').value,
+        occupation: document.getElementById('occupation').value,
+        bloodGroup: document.getElementById('bloodGroup').value,
+        address: document.getElementById('address').value,
+        phone: document.getElementById('phone').value,
         kinAddress: document.getElementById('kinAddress').value,
-        kinPhone: document.getElementById('kinPhone').value
-        // Add other fields as needed...
+        kinPhone: document.getElementById('kinPhone').value,
+        entryTime: document.getElementById('entryDateTime').value,
+        photo: document.getElementById('preview-img').src
       };
 
       let patients = JSON.parse(localStorage.getItem('patients')) || [];
       patients.push(patientData);
       localStorage.setItem('patients', JSON.stringify(patients));
 
-      alert("Successfully Saved!");
+      alert("Patient Saved Successfully!");
       location.href = 'main.php';
     }
   </script>
