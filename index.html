@@ -6,55 +6,72 @@
   <title>Login - Al-Kawaz Clinic App</title>
     <link rel="manifest" href="manifest.json">
   <style>
-    body {
-      font-family: 'Times New Roman', Times, serif;
-      margin: 20px;
-      background-color: #f9f9f9;
-      
-    }
-    .container {
-      max-width: 600px;
-      margin: auto;
-      background: #fff;
-      padding: 20px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
-    }
-    h1, h2 {
-      text-align: center;
-    }
-    label {
-      font-weight: bold;
-      display: block;
-      margin: 10px 0 5px;
-    }
-    input, button {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    button {
-      background-color: #6698fd;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #3376fe;
-    }
-    .error {
-      color: red;
-      font-size: 0.9em;
-      margin-top: -10px;
-    }
-    .link {
-      display: block;
-      text-align: center;
-      margin-top: 10px;
-    }
-  </style>
+ <style>
+  /* This rule is the most important fix */
+  * {
+    box-sizing: border-box; 
+  }
+
+  body {
+    font-family: Arial, sans-serif; /* Cleaner look for a clinic app */
+    margin: 0;
+    padding: 20px;
+    background-color: #f9f9f9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 400px; /* Narrower looks more professional for login */
+    background: #fff;
+    padding: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+  }
+
+  h1, h2 {
+    text-align: center;
+    color: #333;
+  }
+
+  label {
+    font-weight: bold;
+    display: block;
+    margin: 10px 0 5px;
+  }
+
+  input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px; /* Prevents zoom-in on mobile */
+  }
+
+  button {
+    width: 100%;
+    padding: 12px;
+    background-color: #6698fd;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+    transition: background 0.3s;
+  }
+
+  button:hover {
+    background-color: #3376fe;
+  }
+
+  /* ... keep your error and link styles ... */
+</style>
+
 </head>
 <body>
 <div id="animation-container"></div>
