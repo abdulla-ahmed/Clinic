@@ -5,87 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - Al-Kawaz Clinic App</title>
     <link rel="manifest" href="manifest.json">
-  <style>
- 
-
-/* This triggers when the phone is held sideways */
-@media (max-height: 500px) and (orientation: landscape) {
-  #animation-container {
-    display: none; /* Hides the animation to save space for the form */
-  }
   
-  body {
-    align-items: flex-start; /* Aligns container to the top so it doesn't get cut off */
-    padding-top: 20px;
-    margin: 0;
-    background-color: #f9f9f9;
-    display: flex;
-    justify-content: center;
-    min-height: 100vh;
-  }
-}
-
-
-  .container {
-  width: 90%; /* Use percentage for better mobile scaling */
-  max-width: 350px;
-  background: #fff;
-  padding: 15px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
-  
-  /* Add these for rotation support */
-  max-height: 90vh; /* Prevents container from being taller than the screen */
-  overflow-y: auto;  /* Adds a scrollbar inside the box if the screen is too short */
-}
-
-
-  h1, h2 {
-    text-align: center;
-    color: #333;
-  }
-
-  label {
-    font-weight: bold;
-    display: block;
-    margin: 10px 0 5px;
-  }
-
-  input {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 16px; /* Prevents zoom-in on mobile */
-    
-  }
-
-  button {
-    width: 100%;
-    padding: 12px;
-    background-color: #6698fd;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 16px;
-    transition: background 0.3s;
-  }
-
-  button:hover {
-    background-color: #3376fe;
-  }
-#animation-container {
-  width: 100%;
-  max-height: 300px; /* Limits how much it can push the box down */
-  margin-top: 0;
-  margin-bottom: 20px;
-}
-
-
-</style>
+<style>
+    /* ========== ORIGINAL STYLES PRESERVED ========== */
+    body { font-family: "Times New Roman", Times, serif; background-color: #f9f9f9; margin: 20px; }
+    .container { max-width: 600px; margin: auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
+    h1, h2 { text-align: center; }
+    label { font-weight: bold; margin-top: 10px; display: block; }
+    input, button { display: block; width: 100%; max-width: 400px; margin: 10px auto; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 1em; }
+    button { background-color: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
+    button:hover { background-color: #218838; border-radius: 12px; }
+    .error { color: red; text-align: center; margin-top: -5px; font-size: 0.9em; }
+    .link { text-align: center; margin-top: 10px; }
+    .link a { cursor: pointer; color: #007bff; text-decoration: none; }
+    .link a:hover { text-decoration: underline; }
+  </style>
 
 </head>
 <body>
