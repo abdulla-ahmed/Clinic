@@ -2,25 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Login - Dr. Hayder Al-Kawaz Clinic App</title>
+  <title>Login - Medical Prescription App</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#0d6efd">
   <style>
     /* ========== ORIGINAL STYLES PRESERVED ========== */
-    body { font-family: "Times New Roman", Times, serif; background-color: #f9f9f9; margin: 20px; text-align: center;}
+    body { font-family: "Times New Roman", Times, serif; background-color: #f9f9f9; margin: 20px; }
     .container { max-width: 600px; margin: auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
-    h1 { border-radius: 10px;
-          text-align: center; 
-          color: white; 
-          background-color:#1e88e5; 
-          border-radius: 10px; 
-          
-          }
-    h2 { text-align: center; }
+    h1, h2 { text-align: center; }
     label { font-weight: bold; margin-top: 10px; display: block; }
     input, button { display: block; width: 100%; max-width: 400px; margin: 10px auto; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 1em; }
-    button { background-color: #90caf9; color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; margin-top :30px; margin-bottom:30px;}
+    button { background-color: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
     button:hover { background-color: #218838; border-radius: 12px; }
     .error { color: red; text-align: center; margin-top: -5px; font-size: 0.9em; }
     .link { text-align: center; margin-top: 10px; }
@@ -31,7 +24,7 @@
 <body>
 
 <div class="container">
-  <h1>Dr. Hayder Al-Kawaz Clinic </h1>
+  <h1>Medical Prescription App</h1>
 
   <!-- LOGIN FORM -->
   <div id="loginForm">
@@ -140,7 +133,7 @@
     .then(res => res.json())
     .then(data => {
       if (data.success) {
-        // 👇 Redirect based on admin flag
+        // ðŸ‘‡ Redirect based on admin flag
         if (data.is_admin == 1) {
             window.location.href = "admin.php"; // Admin goes to admin panel
         } else {
