@@ -4,177 +4,144 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - Al-Kawaz Clinic App</title>
-  <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="manifest.json">
   <style>
-    * {
-      box-sizing: border-box;
-    }
+ 
 
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background-color: #f9f9f9;
-      display: flex;
-      flex-direction: column; /* Stack animation above the box */
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 10px;
-    }
+/* This triggers when the phone is held sideways */
+@media (max-height: 500px) and (orientation: landscape) {
+  #animation-container {
+    display: none; /* Hides the animation to save space for the form */
+  }
+  
+  body {
+    align-items: flex-start; /* Aligns container to the top so it doesn't get cut off */
+    padding-top: 20px;
+    margin: 0;
+    background-color: #f9f9f9;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+  }
+}
 
-    /* THE ANIMATION CONTAINER */
-    #animation-container {
-      width: 100%;
-      max-width: 200px; /* Adjust size as needed */
-      height: 200px;
-      margin-bottom: 10px;
-    }
 
-    .container {
-      width: 100%;
-      max-width: 350px;
-      background: #fff;
-      padding: 20px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      border-radius: 12px;
-      /* RESPONSIVE ROTATION FIXES */
-      max-height: 85vh; 
-      overflow-y: auto; 
-    }
+  .container {
+  width: 90%; /* Use percentage for better mobile scaling */
+  max-width: 350px;
+  background: #fff;
+  padding: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  
+  /* Add these for rotation support */
+  max-height: 90vh; /* Prevents container from being taller than the screen */
+  overflow-y: auto;  /* Adds a scrollbar inside the box if the screen is too short */
+}
 
-    h1 {
-      font-size: 1.2rem;
-      text-align: center;
-      color: #333;
-    }
 
-    h2 {
-      text-align: center;
-      color: #444;
-      margin-top: 0;
-    }
+  h1, h2 {
+    text-align: center;
+    color: #333;
+  }
 
-    label {
-      font-weight: bold;
-      display: block;
-      margin: 10px 0 5px;
-    }
+  label {
+    font-weight: bold;
+    display: block;
+    margin: 10px 0 5px;
+  }
 
-    input {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 10px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      font-size: 16px;
-    }
+  input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px; /* Prevents zoom-in on mobile */
+    
+  }
 
-    button {
-      width: 100%;
-      padding: 12px;
-      background-color: #6698fd;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 16px;
-      margin-top: 10px;
-    }
+  button {
+    width: 100%;
+    padding: 12px;
+    background-color: #6698fd;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+    transition: background 0.3s;
+  }
 
-    button:hover {
-      background-color: #3376fe;
-    }
+  button:hover {
+    background-color: #3376fe;
+  }
+#animation-container {
+  width: 100%;
+  max-height: 300px; /* Limits how much it can push the box down */
+  margin-top: 0;
+  margin-bottom: 20px;
+}
 
-    .error {
-      color: red;
-      font-size: 14px;
-      text-align: center;
-    }
 
-    .link {
-      text-align: center;
-      margin-top: 15px;
-    }
+</style>
 
-    .link a {
-      color: #6698fd;
-      text-decoration: none;
-    }
-
-    /* HANDLING MOBILE ROTATION (LANDSCAPE) */
-    @media (max-height: 500px) and (orientation: landscape) {
-      body {
-        flex-direction: row; /* Put animation side-by-side with form in landscape */
-        justify-content: center;
-        align-items: center;
-      }
-      #animation-container {
-        max-width: 150px;
-        height: 150px;
-        margin-bottom: 0;
-        margin-right: 20px;
-      }
-      .container {
-        max-height: 95vh;
-      }
-    }
-  </style>
 </head>
 <body>
-
-  <div id="animation-container"></div>
-
-  <div class="container" id="mainContainer">
+<div id="animation-container"></div>
+   <div class="container"style="display: none">
     <h1>Dr. Hayder Al-Kawaz Clinic</h1>
 
+    <!-- Login Form -->
     <div id="loginForm">
       <h2>Login</h2>
       <label for="loginUsername">Username</label>
-      <input type="text" id="loginUsername" placeholder="Enter your username">
+      <input type="text" id="loginUsername" placeholder="Enter your username" required>
       <label for="loginPassword">Password</label>
-      <input type="password" id="loginPassword" placeholder="Enter your password">
+      <input type="password" id="loginPassword" placeholder="Enter your password" required>
       <button type="button" onclick="loginUser()">Login</button>
       <p class="error" id="loginError"></p>
-      <div class="link">
-        <p>Don't have an account? <a href="javascript:void(0);" onclick="toggleForm('registerForm')">Register here</a></p>
-      </div>
     </div>
 
+    <!-- Register Form (Hidden by default) -->
     <div id="registerForm" style="display: none;">
       <h2>Register</h2>
       <label for="registerName">Name</label>
-      <input type="text" id="registerName" placeholder="Enter your name">
+      <input type="text" id="registerName" placeholder="Enter your name" required>
       <label for="registerUsername">Username</label>
-      <input type="text" id="registerUsername" placeholder="Choose a username">
+      <input type="text" id="registerUsername" placeholder="Choose a username" required>
       <label for="registerPassword">Password</label>
-      <input type="password" id="registerPassword" placeholder="Choose a password">
+      <input type="password" id="registerPassword" placeholder="Choose a password" required>
       <label for="confirmPassword">Confirm Password</label>
-      <input type="password" id="confirmPassword" placeholder="Confirm your password">
+      <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
       <button type="button" onclick="registerUser()">Register</button>
       <p class="error" id="registerError"></p>
-      <div class="link">
-        <p>Already have an account? <a href="javascript:void(0);" onclick="toggleForm('loginForm')">Login here</a></p>
-      </div>
+      <p class="link">Already have an account? <a href="javascript:void(0);" onclick="toggleForm('loginForm')">Login here</a></p>
+    </div>
+
+    <!-- Please Log in or Register message (Displayed below the login button) -->
+    <div class="link">
+      <p>Please log in or <a href="javascript:void(0);" onclick="toggleForm('registerForm')">Register</a></p>
     </div>
   </div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.4/lottie.min.js"></script>
-  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.4/lottie.min.js"></script>
+  <script src="app.js"></script>
+  <script> if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then((registration) => {
+          console.log('Service Worker registered with scope:', registration.scope);
+        })
+        .catch((error) => {
+          console.error('Service Worker registration failed:', error);
+        });
+}
+  </script>
   <script>
-    // Initialize Animation
-    var animation = lottie.loadAnimation({
-      container: document.getElementById('animation-container'),
-      renderer: 'svg',
-      loop: true,
-      autoplay: true,
-      // You can replace this path with your own JSON file
-      path: 'https://assets9.lottiefiles.com/packages/lf20_5njp3v83.json' 
-    });
-
     function toggleForm(formId) {
-      document.getElementById('loginForm').style.display = (formId === 'loginForm') ? 'block' : 'none';
-      document.getElementById('registerForm').style.display = (formId === 'registerForm') ? 'block' : 'none';
+      const forms = document.querySelectorAll('.container div');
+      forms.forEach(form => form.style.display = 'none');
+      document.getElementById(formId).style.display = 'block';
       clearErrors();
     }
 
@@ -185,37 +152,52 @@
       const confirmPassword = document.getElementById('confirmPassword').value;
 
       if (!name || !username || !password || !confirmPassword) {
-        showError('registerError', 'All fields required!');
+        showError('registerError', 'All fields are required!');
         return;
       }
+
       if (password !== confirmPassword) {
-        showError('registerError', 'Passwords mismatch!');
+        showError('registerError', 'Passwords do not match!');
         return;
       }
 
       const users = JSON.parse(localStorage.getItem('users')) || [];
+      if (users.some(user => user.username === username)) {
+        showError('registerError', 'Username already exists!');
+        return;
+      }
+
       users.push({ name, username, password });
       localStorage.setItem('users', JSON.stringify(users));
-      alert('Success!');
+      alert('Registration successful!');
       toggleForm('loginForm');
     }
 
     function loginUser() {
       const username = document.getElementById('loginUsername').value;
       const password = document.getElementById('loginPassword').value;
+
       const users = JSON.parse(localStorage.getItem('users')) || [];
-      const user = users.find(u => u.username === username && u.password === password);
+      const user = users.find(user => user.username === username && user.password === password);
 
       if (!user) {
-        showError('loginError', 'Invalid login!');
+        showError('loginError', 'Invalid username or password!');
         return;
       }
+
+      // Store user info in localStorage to display on the welcome page
       localStorage.setItem('loggedInUser', JSON.stringify(user));
-      window.location.href = "welcome.html";
+      window.location.href = "welcome.html"; // Redirect to welcome page
     }
 
-    function showError(id, msg) { document.getElementById(id).textContent = msg; }
-    function clearErrors() { document.querySelectorAll('.error').forEach(e => e.textContent = ''); }
+    function showError(errorElementId, errorMessage) {
+      const errorElement = document.getElementById(errorElementId);
+      errorElement.textContent = errorMessage;
+    }
+
+    function clearErrors() {
+      document.querySelectorAll('.error').forEach(error => error.textContent = '');
+    }
   </script>
 </body>
 </html>
