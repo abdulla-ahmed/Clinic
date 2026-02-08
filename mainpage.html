@@ -4,86 +4,33 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Main Page - Al-Kawaz Clinic</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background-color: #f9f9f9;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 400px;
-      background: #fff;
-      padding: 25px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      border-radius: 12px;
-      text-align: center;
-      /* Responsive fix for rotation */
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-
-    h1 {
-      color: #333;
-      font-size: 1.5rem;
-      margin-bottom: 25px;
-      border-bottom: 2px solid #6698fd;
-      padding-bottom: 10px;
-    }
-
-    /* Menu Button Styling */
-    .menu-btn {
-      width: 100%;
-      padding: 15px;
-      margin-bottom: 12px;
-      background-color: #6698fd;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 16px;
-      transition: background 0.3s, transform 0.2s;
-      display: block;
-      text-decoration: none; /* In case you use <a> tags */
-    }
-
-    .menu-btn:hover {
-      background-color: #3376fe;
-      transform: translateY(-2px);
-    }
-
+  
+    <style>
+    /* ========== ORIGINAL STYLES PRESERVED ========== */
+    body { font-family: "Times New Roman", Times, serif; background-color: #f9f9f9; margin: 20px; }
+    .container { max-width: 600px; margin: auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
+    h1, h2 { text-align: center; }
+    label { font-weight: bold; margin-top: 10px; display: block; }
+    input, button { display: block; width: 100%; max-width: 400px; margin: 10px auto; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 1em; }
+    .menu-btn { background-color: #6698fd; color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
+    .menu-btn:hover { background-color: #3376fe; border-radius: 12px; }
+    .error { color: red; text-align: center; margin-top: -5px; font-size: 0.9em; }
+    .link { text-align: center; margin-top: 10px; }
+    .link a { cursor: pointer; color: #007bff; text-decoration: none; }
+    .link a:hover { text-decoration: underline; }
+  
+    
     /* Logout Style (Red) */
     .logout-btn {
       background-color: #ff4d4d;
-      margin-top: 15px;
+      
     }
 
     .logout-btn:hover {
       background-color: #e60000;
     }
 
-    /* Landscape Mode optimization */
-    @media (max-height: 500px) and (orientation: landscape) {
-      .container {
-        max-width: 500px;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-      }
-      h1 { grid-column: span 2; }
-    }
-  </style>
+    </style>
 </head>
 <body>
 
