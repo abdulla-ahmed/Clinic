@@ -66,16 +66,16 @@
     background-color: #3376fe;
   }
 #animation-container {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
-  height: 100%;
-  z-index: 999; /* Keeps it above everything */
-  pointer-events: none; /* Allows clicking through it if needed */
+  max-height: 300px; /* Limits how much it can push the box down */
+  margin-top: 0;
+  margin-bottom: 20px;
 }
 
-  /* ... keep your error and link styles ... */
+.container {
+  margin-top: 10px; /* This brings the white box closer to the top */
+}
+
 </style>
 
 </head>
