@@ -11,83 +11,75 @@
     }
 
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: Arial, sans-serif;
       margin: 0;
-      background-color: #f0f2f5;
+      background-color: #f9f9f9;
       display: flex;
-      flex-direction: column; /* Stack animation and form vertically */
+      flex-direction: column; /* Stack animation above the box */
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      padding: 20px;
+      padding: 10px;
     }
 
-    /* Animation scaling */
+    /* THE ANIMATION CONTAINER */
     #animation-container {
       width: 100%;
-      max-width: 250px;
+      max-width: 200px; /* Adjust size as needed */
+      height: 200px;
       margin-bottom: 10px;
     }
 
     .container {
       width: 100%;
-      max-width: 380px;
-      background: #ffffff;
-      padding: 25px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-      border-radius: 16px;
-      /* RESPONSIVE FIXES FOR ROTATION */
-      max-height: 90vh; 
+      max-width: 350px;
+      background: #fff;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
+      /* RESPONSIVE ROTATION FIXES */
+      max-height: 85vh; 
       overflow-y: auto; 
-      transition: all 0.3s ease-in-out;
     }
 
     h1 {
-      font-size: 1.5rem;
+      font-size: 1.2rem;
       text-align: center;
-      color: black;
-      margin-bottom: 10px;
+      color: #333;
     }
 
     h2 {
       text-align: center;
-      color: #333;
-      font-size: 1rem;
+      color: #444;
+      margin-top: 0;
     }
 
     label {
-      font-weight: 600;
+      font-weight: bold;
       display: block;
-      margin: 15px 0 5px;
-      color: #555;
+      margin: 10px 0 5px;
     }
 
     input {
       width: 100%;
       padding: 12px;
-      margin-bottom: 5px;
-      border: 1.5px solid #dcdcdc;
-      border-radius: 8px;
-      font-size: 16px; /* Prevents iOS auto-zoom */
-      outline: none;
-    }
-
-    input:focus {
-      border-color: #6698fd;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
     }
 
     button {
       width: 100%;
-      padding: 14px;
+      padding: 12px;
       background-color: #6698fd;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       cursor: pointer;
       font-weight: bold;
       font-size: 16px;
-      margin-top: 15px;
-      transition: background 0.3s;
+      margin-top: 10px;
     }
 
     button:hover {
@@ -95,36 +87,36 @@
     }
 
     .error {
-      color: #d93025;
-      font-size: 0.85rem;
-      margin-top: 5px;
-      min-height: 18px;
+      color: red;
+      font-size: 14px;
+      text-align: center;
     }
 
     .link {
       text-align: center;
-      margin-top: 20px;
-      font-size: 0.9rem;
-      color: #666;
+      margin-top: 15px;
     }
 
     .link a {
-      color: #1a73e8;
+      color: #6698fd;
       text-decoration: none;
-      font-weight: bold;
     }
 
-    /* LANDSCAPE OPTIMIZATION */
+    /* HANDLING MOBILE ROTATION (LANDSCAPE) */
     @media (max-height: 500px) and (orientation: landscape) {
       body {
-        justify-content: flex-start; /* Don't center vertically so top isn't cut off */
-        padding: 10px;
+        flex-direction: row; /* Put animation side-by-side with form in landscape */
+        justify-content: center;
+        align-items: center;
       }
       #animation-container {
-        display: none; /* Hide animation to save space on small horizontal screens */
+        max-width: 150px;
+        height: 150px;
+        margin-bottom: 0;
+        margin-right: 20px;
       }
       .container {
-        max-width: 500px; /* Wider looks better in landscape */
+        max-height: 95vh;
       }
     }
   </style>
@@ -140,13 +132,10 @@
       <h2>Login</h2>
       <label for="loginUsername">Username</label>
       <input type="text" id="loginUsername" placeholder="Enter your username">
-      <p class="error" id="loginError"></p>
-      
       <label for="loginPassword">Password</label>
       <input type="password" id="loginPassword" placeholder="Enter your password">
-      
       <button type="button" onclick="loginUser()">Login</button>
-      
+      <p class="error" id="loginError"></p>
       <div class="link">
         <p>Don't have an account? <a href="javascript:void(0);" onclick="toggleForm('registerForm')">Register here</a></p>
       </div>
@@ -154,21 +143,16 @@
 
     <div id="registerForm" style="display: none;">
       <h2>Register</h2>
-      <label for="registerName">Full Name</label>
+      <label for="registerName">Name</label>
       <input type="text" id="registerName" placeholder="Enter your name">
-      
       <label for="registerUsername">Username</label>
       <input type="text" id="registerUsername" placeholder="Choose a username">
-      
       <label for="registerPassword">Password</label>
       <input type="password" id="registerPassword" placeholder="Choose a password">
-      
       <label for="confirmPassword">Confirm Password</label>
       <input type="password" id="confirmPassword" placeholder="Confirm your password">
+      <button type="button" onclick="registerUser()">Register</button>
       <p class="error" id="registerError"></p>
-      
-      <button type="button" onclick="registerUser()">Create Account</button>
-      
       <div class="link">
         <p>Already have an account? <a href="javascript:void(0);" onclick="toggleForm('loginForm')">Login here</a></p>
       </div>
@@ -178,23 +162,16 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.4/lottie.min.js"></script>
   
   <script>
-    // Initialize Lottie Animation (Ensure you have a valid JSON URL or file)
-    lottie.loadAnimation({
+    // Initialize Animation
+    var animation = lottie.loadAnimation({
       container: document.getElementById('animation-container'),
       renderer: 'svg',
       loop: true,
       autoplay: true,
-      path: 'https://assets9.lottiefiles.com/packages/lf20_5njp3v83.json' // Example medical animation
+      // You can replace this path with your own JSON file
+      path: 'https://assets9.lottiefiles.com/packages/lf20_5njp3v83.json' 
     });
 
-    // PWA Service Worker Registration
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(reg => console.log('SW Registered'))
-        .catch(err => console.error('SW Failed', err));
-    }
-
-    // Navigation logic
     function toggleForm(formId) {
       document.getElementById('loginForm').style.display = (formId === 'loginForm') ? 'block' : 'none';
       document.getElementById('registerForm').style.display = (formId === 'registerForm') ? 'block' : 'none';
@@ -202,55 +179,43 @@
     }
 
     function registerUser() {
-      const name = document.getElementById('registerName').value.trim();
-      const username = document.getElementById('registerUsername').value.trim();
+      const name = document.getElementById('registerName').value;
+      const username = document.getElementById('registerUsername').value;
       const password = document.getElementById('registerPassword').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
 
       if (!name || !username || !password || !confirmPassword) {
-        showError('registerError', 'All fields are required!');
+        showError('registerError', 'All fields required!');
         return;
       }
       if (password !== confirmPassword) {
-        showError('registerError', 'Passwords do not match!');
+        showError('registerError', 'Passwords mismatch!');
         return;
       }
 
       const users = JSON.parse(localStorage.getItem('users')) || [];
-      if (users.some(u => u.username === username)) {
-        showError('registerError', 'Username already exists!');
-        return;
-      }
-
       users.push({ name, username, password });
       localStorage.setItem('users', JSON.stringify(users));
-      alert('Registration successful! Please login.');
+      alert('Success!');
       toggleForm('loginForm');
     }
 
     function loginUser() {
-      const username = document.getElementById('loginUsername').value.trim();
+      const username = document.getElementById('loginUsername').value;
       const password = document.getElementById('loginPassword').value;
-
       const users = JSON.parse(localStorage.getItem('users')) || [];
       const user = users.find(u => u.username === username && u.password === password);
 
       if (!user) {
-        showError('loginError', 'Invalid credentials!');
+        showError('loginError', 'Invalid login!');
         return;
       }
-
       localStorage.setItem('loggedInUser', JSON.stringify(user));
       window.location.href = "welcome.html";
     }
 
-    function showError(id, msg) {
-      document.getElementById(id).textContent = msg;
-    }
-
-    function clearErrors() {
-      document.querySelectorAll('.error').forEach(e => e.textContent = '');
-    }
+    function showError(id, msg) { document.getElementById(id).textContent = msg; }
+    function clearErrors() { document.querySelectorAll('.error').forEach(e => e.textContent = ''); }
   </script>
 </body>
 </html>
