@@ -68,6 +68,15 @@
   button:hover {
     background-color: #3376fe;
   }
+#animation-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 999; /* Keeps it above everything */
+  pointer-events: none; /* Allows clicking through it if needed */
+}
 
   /* ... keep your error and link styles ... */
 </style>
