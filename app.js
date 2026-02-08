@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderer: 'svg',
     loop: false,
     autoplay: true,
-    path: 'medicaltry.json'
+    path: 'Medical Shield.json'
   });
 
   anim.addEventListener('DOMLoaded', () => {
