@@ -2,188 +2,169 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Login - Dr. Hayder Al-Kawaz Clinic App</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#0d6efd">
+  <title>Login - Medical Prescription App</title>
+    <link rel="manifest" href="manifest.json">
   <style>
-    /* ========== ORIGINAL STYLES PRESERVED ========== */
-    body { font-family: "Times New Roman", Times, serif; background-color: #f9f9f9; margin: 20px; }
-    .container { max-width: 600px; margin: auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
-    h1, h2 { text-align: center; }
-    label { font-weight: bold; margin-top: 10px; display: block; }
-    input, button { display: block; width: 100%; max-width: 400px; margin: 10px auto; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 1em; }
-    button { background-color: #1e88e5; color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
-    button:hover { background-color: #218838; border-radius: 12px; }
-    .error { color: red; text-align: center; margin-top: -5px; font-size: 0.9em; }
-    .link { text-align: center; margin-top: 10px; }
-    .link a { cursor: pointer; color: #007bff; text-decoration: none; }
-    .link a:hover { text-decoration: underline; }
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      margin: 20px;
+      background-color: #f9f9f9;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin: 10px 0 5px;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    .error {
+      color: red;
+      font-size: 0.9em;
+      margin-top: -10px;
+    }
+    .link {
+      display: block;
+      text-align: center;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
+<div id="animation-container"></div>
+    <div class="container"style="display: none">
+    <h1>Welcome to the Medical Prescription App</h1>
 
-<div class="container">
-  <h1>Dr. Hayder Al-Kawaz Clinic </h1>
-
-  <!-- LOGIN FORM -->
-  <div id="loginForm">
-    <h2>Login</h2>
-    <form id="authLoginForm" onsubmit="event.preventDefault(); loginUser();">
+    <!-- Login Form -->
+    <div id="loginForm">
+      <h2>Login</h2>
       <label for="loginUsername">Username</label>
-      <input type="text" id="loginUsername" name="username" autocomplete="username" placeholder="Enter your username" required>
-      
+      <input type="text" id="loginUsername" placeholder="Enter your username" required>
       <label for="loginPassword">Password</label>
-      <input type="password" id="loginPassword" name="password" autocomplete="current-password" placeholder="Enter your password" required>
-      
-      <button type="submit">Login</button>
-    </form>
-    <p class="error" id="loginError"></p>
+      <input type="password" id="loginPassword" placeholder="Enter your password" required>
+      <button type="button" onclick="loginUser()">Login</button>
+      <p class="error" id="loginError"></p>
+    </div>
+
+    <!-- Register Form (Hidden by default) -->
+    <div id="registerForm" style="display: none;">
+      <h2>Register</h2>
+      <label for="registerName">Name</label>
+      <input type="text" id="registerName" placeholder="Enter your name" required>
+      <label for="registerUsername">Username</label>
+      <input type="text" id="registerUsername" placeholder="Choose a username" required>
+      <label for="registerPassword">Password</label>
+      <input type="password" id="registerPassword" placeholder="Choose a password" required>
+      <label for="confirmPassword">Confirm Password</label>
+      <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
+      <button type="button" onclick="registerUser()">Register</button>
+      <p class="error" id="registerError"></p>
+      <p class="link">Already have an account? <a href="javascript:void(0);" onclick="toggleForm('loginForm')">Login here</a></p>
+    </div>
+
+    <!-- Please Log in or Register message (Displayed below the login button) -->
     <div class="link">
-      No account? <a onclick="toggleForm()">Register here</a>
+      <p>Please log in or <a href="javascript:void(0);" onclick="toggleForm('registerForm')">Register</a> to access the app.</p>
     </div>
   </div>
-
-  <!-- REGISTER FORM -->
-  <div id="registerForm" style="display:none;">
-    <h2>Register</h2>
-    <form id="authRegisterForm" onsubmit="event.preventDefault(); registerUser();">
-      <label>Name</label>
-      <input type="text" id="regName" placeholder="Enter your name" required>
-      
-      <label>Username</label>
-      <input type="text" id="regUsername" autocomplete="username" placeholder="Choose a username" required>
-      
-      <label>Email</label>
-      <input type="email" id="regEmail" autocomplete="email" placeholder="Enter your email" required>
-      
-      <label>Password</label>
-      <input type="password" id="regPassword" autocomplete="new-password" placeholder="Choose a password" required>
-      
-      <label>Confirm Password</label>
-      <input type="password" id="regConfirm" autocomplete="new-password" placeholder="Confirm your password" required>
-      
-      <button type="submit">Register</button>
-    </form>
-    <p class="error" id="registerError"></p>
-    <div class="link">
-      Already have an account? <a onclick="toggleForm()">Login</a>
-    </div>
-  </div>
-</div>
-
-<script>
-  // --- AUTH & AUTO-LOGIN LOGIC ---
-  window.addEventListener('load', () => {
-    if (document.getElementById("loginForm").style.display !== "none") {
-      fetch('./check-session.php?t=' + Date.now())
-        .then(res => { if (res.ok) window.location.href = "welcome.php"; })
-        .catch(() => {});
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.4/lottie.min.js"></script>
+  <script src="app.js"></script>
+  <script> if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then((registration) => {
+          console.log('Service Worker registered with scope:', registration.scope);
+        })
+        .catch((error) => {
+          console.error('Service Worker registration failed:', error);
+        });
+}
+  </script>
+  <script>
+    function toggleForm(formId) {
+      const forms = document.querySelectorAll('.container div');
+      forms.forEach(form => form.style.display = 'none');
+      document.getElementById(formId).style.display = 'block';
+      clearErrors();
     }
-  });
 
-  function forceLogout() {
-    localStorage.clear();
-    if (document.getElementById("loginForm").style.display !== "block") {
-        window.location.href = "index.html?reason=expired";
-    }
-  }
+    function registerUser() {
+      const name = document.getElementById('registerName').value;
+      const username = document.getElementById('registerUsername').value;
+      const password = document.getElementById('registerPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
 
-  // Global Fetch Interceptor
-  const { fetch: originalFetch } = window;
-  window.fetch = async (...args) => {
-    const response = await originalFetch(...args);
-    const isLoginAttempt = args[0].includes('login.php') || args[0].includes('check-session.php');
-    if ((response.status === 401 || response.status === 403) && !isLoginAttempt) {
-      forceLogout();
-    }
-    return response;
-  };
-
-  document.addEventListener("visibilitychange", () => {
-    const loginFormHidden = document.getElementById("loginForm").style.display === "none";
-    if (document.visibilityState === "visible" && loginFormHidden) {
-      fetch('./check-session.php?t=' + Date.now()).catch(() => {});
-    }
-  });
-
-  // --- UI FUNCTIONS ---
-  function toggleForm() {
-    const loginF = document.getElementById("loginForm");
-    const regF = document.getElementById("registerForm");
-    loginF.style.display = (loginF.style.display === "none") ? "block" : "none";
-    regF.style.display = (regF.style.display === "none") ? "block" : "none";
-    clearErrors();
-  }
-
-  function clearErrors() {
-    document.getElementById("loginError").textContent = "";
-    document.getElementById("registerError").textContent = "";
-  }
-
-  function loginUser() {
-    const user = document.getElementById("loginUsername").value;
-    const pass = document.getElementById("loginPassword").value;
-
-    fetch("./login.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: user, password: pass })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        // ðŸ‘‡ Redirect based on admin flag
-        if (data.is_admin == 1) {
-            window.location.href = "admin.php"; // Admin goes to admin panel
-        } else {
-            window.location.href = "welcome.php"; // Normal user goes to welcome page
-        }
-      } else {
-        document.getElementById("loginError").textContent = data.message;
+      if (!name || !username || !password || !confirmPassword) {
+        showError('registerError', 'All fields are required!');
+        return;
       }
-    })
-    .catch(() => {
-      document.getElementById("loginError").textContent = "Connection error.";
-    });
-  }
 
-  function registerUser() {
-    const pass = document.getElementById("regPassword").value;
-    const confirm = document.getElementById("regConfirm").value;
-    if (pass !== confirm) {
-      document.getElementById("registerError").textContent = "Passwords do not match";
-      return;
-    }
-    fetch("./register.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: document.getElementById("regName").value,
-        username: document.getElementById("regUsername").value,
-        email: document.getElementById("regEmail").value,
-        password: pass
-      })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        alert("Registration successful. Wait for admin approval.");
-        toggleForm();
-      } else {
-        document.getElementById("registerError").textContent = data.message;
+      if (password !== confirmPassword) {
+        showError('registerError', 'Passwords do not match!');
+        return;
       }
-    });
-  }
 
-  // Service Worker Registration
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/service-worker.js').then(reg => {
-        console.log('v7 active');
-      });
-    });
-  }
-</script>
+      const users = JSON.parse(localStorage.getItem('users')) || [];
+      if (users.some(user => user.username === username)) {
+        showError('registerError', 'Username already exists!');
+        return;
+      }
+
+      users.push({ name, username, password });
+      localStorage.setItem('users', JSON.stringify(users));
+      alert('Registration successful!');
+      toggleForm('loginForm');
+    }
+
+    function loginUser() {
+      const username = document.getElementById('loginUsername').value;
+      const password = document.getElementById('loginPassword').value;
+
+      const users = JSON.parse(localStorage.getItem('users')) || [];
+      const user = users.find(user => user.username === username && user.password === password);
+
+      if (!user) {
+        showError('loginError', 'Invalid username or password!');
+        return;
+      }
+
+      // Store user info in localStorage to display on the welcome page
+      localStorage.setItem('loggedInUser', JSON.stringify(user));
+      window.location.href = "welcome.html"; // Redirect to welcome page
+    }
+
+    function showError(errorElementId, errorMessage) {
+      const errorElement = document.getElementById(errorElementId);
+      errorElement.textContent = errorMessage;
+    }
+
+    function clearErrors() {
+      document.querySelectorAll('.error').forEach(error => error.textContent = '');
+    }
+  </script>
 </body>
 </html>
