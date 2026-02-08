@@ -9,69 +9,91 @@
     body { font-family: "Times New Roman", Times, serif; background-color: #f9f9f9; margin: 20px; }
     .container { max-width: 600px; margin: auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
     h1, h2 { text-align: center; }
-    label { font-weight: bold; margin-top: 15px; display: block; }
-    input, select, button { display: block; width: 100%; max-width: 400px; margin: 10px auto; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 1em; }
+    
+    label { font-weight: bold; margin-top: 15px; display: block; color: #333; }
+    
+    /* Every item in one line with same box size */
+    input, select, button { 
+      display: block; 
+      width: 100%; 
+      max-width: 450px; /* Uniform width for all boxes */
+      margin: 8px auto 18px auto; 
+      padding: 12px; 
+      border-radius: 8px; 
+      border: 1px solid #ccc; 
+      box-sizing: border-box; 
+      font-size: 1em; 
+    }
+    
     button { background-color: #6698fd; color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
     button:hover { background-color: #3376fe; border-radius: 12px; }
     
-    /* Barcode and Image styling */
-    #barcode-container { text-align: center; margin-top: 20px; }
     #preview-img { display: block; max-width: 150px; margin: 10px auto; border-radius: 8px; border: 1px dashed #ccc; }
-    .row { display: flex; justify-content: center; gap: 10px; max-width: 400px; margin: auto; }
-    .row input, .row select { width: 48%; }
+    #barcode-container { text-align: center; margin-top: 20px; }
+    
+    .info-note { text-align: center; font-size: 0.85em; color: #666; margin-bottom: 20px; }
   </style>
 </head>
 <body>
 
   <div class="container">
     <h1>New Patient Registration</h1>
+    <p class="info-note">Only Patient Name is mandatory</p>
     
     <form id="patientForm">
-      <label>Registration Number</label>
+      <label>Registration Number (Auto)</label>
       <input type="text" id="regNumber" readonly>
 
-      <label>Patient Name (Required)</label>
-      <input type="text" id="patientName" placeholder="Full Name" required>
+      <label>Patient Name</label>
+      <input type="text" id="patientName" placeholder="Enter Full Name" required>
 
-      <div class="row">
-        <div>
-          <label>Age</label>
-          <input type="number" id="age" placeholder="Years">
-        </div>
-        <div>
-          <label>Sex</label>
-          <select id="sex">
-            <option value="">Select</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Others">Others</option>
-          </select>
-        </div>
-      </div>
+      <label>Age</label>
+      <input type="number" id="age" placeholder="Enter Age">
+
+      <label>Sex</label>
+      <select id="sex">
+        <option value="">-- Select Sex --</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Others">Others</option>
+      </select>
 
       <label>Race</label>
-      <input type="text" id="race">
+      <input type="text" id="race" placeholder="Enter Race">
 
       <label>Religion</label>
-      <input type="text" id="religion">
+      <input type="text" id="religion" placeholder="Enter Religion">
 
       <label>Occupation</label>
-      <input type="text" id="occupation">
+      <input type="text" id="occupation" placeholder="Enter Occupation">
 
       <label>Blood Group & Rh</label>
-      <input type="text" id="bloodGroup" placeholder="e.g., O+">
+      <input type="text" id="bloodGroup" placeholder="e.g. O+">
 
-      <label>Address & Telefon</label>
-      <input type="text" id="address" placeholder="Address">
+      <label>Patient Address</label>
+      <input type="text" id="address" placeholder="Home Address">
+
+      <label>Patient Telephone</label>
       <input type="tel" id="phone" placeholder="Phone Number">
 
-      <label>Next of Kin (Address & Telefon)</label>
-      <input type="text" id="kinInfo" placeholder="Name/Address/Phone">
+      <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+      <h3>Next of Kin Details</h3>
 
-      <label>Date & Time of 1st Visit</label>
-      <input type="text" id="visitDateTime" readonly>
+      <label>Next of Kin Address</label>
+      <input type="text" id="kinAddress" placeholder="Kin Address">
 
-      <label>Upload Patient Picture</label>
+      <label>Next of Kin Telephone</label>
+      <input type="tel" id="kinPhone" placeholder="Kin Phone Number">
+
+      <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+
+      <label>Date of 1st Visit (Choose from Calendar)</label>
+      <input type="date" id="firstVisitDate">
+
+      <label>Current Entry Date & Time (Automatic)</label>
+      <input type="text" id="entryDateTime" readonly>
+
+      <label>Patient Picture</label>
       <input type="file" id="patientPic" accept="image/*" onchange="previewImage(event)">
       <img id="preview-img" src="#" alt="Preview" style="display:none;">
 
@@ -80,34 +102,33 @@
       </div>
 
       <button type="button" onclick="savePatient()">Save Patient Information</button>
-      <button type="button" style="background-color: #6c757d;" onclick="location.href='main.php'">Back to Main</button>
+      <button type="button" style="background-color: #6c757d;" onclick="location.href='main.php'">Back to Main Menu</button>
     </form>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 
   <script>
-    // 1. Automatic Registration Number and Date
     window.onload = function() {
-      // Create Unique Reg Number based on timestamp
-      const regId = "AL-" + Date.now().toString().slice(-6);
+      // 1. Generate Reg Number
+      const regId = "AL-" + Math.floor(100000 + Math.random() * 900000);
       document.getElementById('regNumber').value = regId;
 
-      // Set current Date and Time
+      // 2. Set Current Automatic Time
       const now = new Date();
-      document.getElementById('visitDateTime').value = now.toLocaleString();
+      document.getElementById('entryDateTime').value = now.toLocaleString();
+      
+      // 3. Set Default Calendar Date to Today
+      document.getElementById('firstVisitDate').valueAsDate = new Date();
 
-      // Generate Barcode
+      // 4. Generate Barcode
       JsBarcode("#barcode", regId, {
         format: "CODE128",
-        lineColor: "#000",
-        width: 2,
-        height: 40,
-        displayValue: true
+        displayValue: true,
+        fontSize: 20
       });
     };
 
-    // 2. Image Preview logic
     function previewImage(event) {
       const reader = new FileReader();
       reader.onload = function() {
@@ -115,14 +136,13 @@
         output.src = reader.result;
         output.style.display = 'block';
       };
-      reader.readAsDataURL(event.target.files[0]);
+      if(event.target.files[0]) reader.readAsDataURL(event.target.files[0]);
     }
 
-    // 3. Save to Local Storage
     function savePatient() {
       const name = document.getElementById('patientName').value;
       if (!name) {
-        alert("Patient Name is required!");
+        alert("At least the Patient's Name must be filled!");
         return;
       }
 
@@ -131,26 +151,18 @@
         name: name,
         age: document.getElementById('age').value,
         sex: document.getElementById('sex').value,
-        race: document.getElementById('race').value,
-        religion: document.getElementById('religion').value,
-        occupation: document.getElementById('occupation').value,
-        bloodGroup: document.getElementById('bloodGroup').value,
-        address: document.getElementById('address').value,
-        phone: document.getElementById('phone').value,
-        kinInfo: document.getElementById('kinInfo').value,
-        visitTime: document.getElementById('visitDateTime').value,
-        // For local storage, images are saved as Base64 strings (simplified for this assignment)
-        photo: document.getElementById('preview-img').src
+        firstVisitDate: document.getElementById('firstVisitDate').value,
+        entryTime: document.getElementById('entryDateTime').value,
+        kinAddress: document.getElementById('kinAddress').value,
+        kinPhone: document.getElementById('kinPhone').value
+        // Add other fields as needed...
       };
 
-      // Get existing patients or empty array
       let patients = JSON.parse(localStorage.getItem('patients')) || [];
       patients.push(patientData);
-      
-      // Save back to local storage
       localStorage.setItem('patients', JSON.stringify(patients));
 
-      alert("Patient Registered Successfully!\nReg No: " + patientData.regNumber);
+      alert("Successfully Saved!");
       location.href = 'main.php';
     }
   </script>
