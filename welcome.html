@@ -49,30 +49,32 @@
     <h1 style="font-size: 1.5rem;">Welcome to Dr. Hayder Al-Kawaz Clinic</h1>
     <div id="welcomeMessage" class="welcome-message"></div>
     <button id="proceedButton" onclick="proceedToMain()">Proceed to Drug Database</button>
-    <button type="button" onclick="logoutUser()" style="background-color: #ff4d4d;">Logout</button>
+    <button type="button" onclick="logoutUser()" style="background-color: #ff657d;">Logout</button>
 </div>
 
   <script>
-    // Check if the user is logged in by checking localStorage
+    // 1. Logic to run when the page loads
     const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser'));
 
     if (loggedInUser) {
-      // Display the welcome message with the user's name
       const welcomeMessage = document.getElementById('welcomeMessage');
       welcomeMessage.textContent = `Glad to see you again, ${loggedInUser.name}!`;
     } else {
-      // If no user is logged in, redirect them back to the login page
       window.location.href = "login.html";
     }
 
+    // 2. Function to go to the next page
     function proceedToMain() {
-      window.location.href = "doctorinfo.html"; // Redirect to the Drug Database page
+      window.location.href = "doctorinfo.html";
     }
-    // 1. Remove the specific logged-in user data
-  localStorage.removeItem('loggedInUser');
-    // 3. Redirect the user back to the login page
-  window.location.href = "index.html"; 
+
+    // 3. CORRECTED Logout Function
+    function logoutUser() {
+      // This only runs when the user clicks the button
+      localStorage.removeItem('loggedInUser');
+      window.location.href = "login.html"; // Ensure this matches your login file name
     }
-  </script>
+</script>
+
 </body>
 </html>
