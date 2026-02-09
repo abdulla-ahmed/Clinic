@@ -56,37 +56,34 @@
       </select>
 
       <label>Race</label>
-      <select id="race">
-        <option value="">-- Select Race --</option>
-        <option value="Arabic">Arabic</option>
-        <option value="Kurdish">Kurdish</option>
-        <option value="Other">Other</option>
-      </select>
+      <input list="race-options" id="race" placeholder="Select or type Race">
+      <datalist id="race-options">
+        <option value="Arabic">
+        <option value="Kurdish">
+      </datalist>
 
       <label>Religion</label>
-      <select id="religion">
-        <option value="">-- Select Religion --</option>
-        <option value="Muslim">Muslim</option>
-        <option value="Christian">Christian</option>
-        <option value="Other">Other</option>
-      </select>
+      <input list="religion-options" id="religion" placeholder="Select or type Religion">
+      <datalist id="religion-options">
+        <option value="Muslim">
+        <option value="Christian">
+      </datalist>
 
       <label>Occupation</label>
       <input type="text" id="occupation" placeholder="Occupation">
 
       <label>Blood Group & Rh</label>
-      <select id="bloodGroup">
-        <option value="">-- Select Blood Group --</option>
-        <option value="O+">O+</option>
-        <option value="O-">O-</option>
-        <option value="A+">A+</option>
-        <option value="A-">A-</option>
-        <option value="B+">B+</option>
-        <option value="B-">B-</option>
-        <option value="AB+">AB+</option>
-        <option value="AB-">AB-</option>
-        <option value="Others">Others</option>
-      </select>
+      <input list="blood-options" id="bloodGroup" placeholder="Select or type Blood Group">
+      <datalist id="blood-options">
+        <option value="O+">
+        <option value="O-">
+        <option value="A+">
+        <option value="A-">
+        <option value="B+">
+        <option value="B-">
+        <option value="AB+">
+        <option value="AB-">
+      </datalist>
 
       <label>Patient Address</label>
       <input type="text" id="address" placeholder="Home Address">
@@ -118,7 +115,7 @@
       
       <div id="camera-container">
         <video id="camera-stream" autoplay playsinline></video>
-        <button type="button" class="btn-switch" onclick="switchCamera()">Switch Camera (Front/Back)</button>
+        <button type="button" class="btn-switch" onclick="switchCamera()">Switch Camera</button>
         <button type="button" onclick="capturePhoto()">Capture Photo</button>
       </div>
 
