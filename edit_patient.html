@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Edit Patient - Al-Kawaz Clinic</title>
   <script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
   <style>
     /* ========== THEME & LAYOUT OPTIMIZATION ========== */
     body { font-family: "Times New Roman", Times, serif; background-color: #f9f9f9; margin: 20px; font-size: 0.9em; }
@@ -13,7 +14,6 @@
     
     label { font-weight: bold; margin-top: 10px; display: block; color: #333; }
     
-    /* Smaller text size to fit one line */
     input, select, button { 
       display: block; width: 100%; max-width: 450px; 
       margin: 5px auto 12px auto; padding: 10px; 
@@ -21,7 +21,6 @@
       box-sizing: border-box; font-size: 0.95em; 
     }
     
-    /* Button Layouts */
     .btn-row { display: flex; justify-content: center; gap: 10px; max-width: 450px; margin: auto; }
     .btn-row button { flex: 1; margin: 5px 0; }
 
@@ -29,11 +28,12 @@
     .btn-save { background-color: #6698fd; }
     .btn-save:hover { background-color: #3376fe; }
     .btn-cancel { background-color: #9e9e9e; }
-    .btn-delete { background-color: #e53935; width: 100%; max-width: 450px; margin: 10px auto; }
+    .btn-delete { background-color: #e53935; }
     .btn-delete:hover { background-color: #c62828; }
+    .btn-download { background-color: #4CAF50; }
+    .btn-download:hover { background-color: #388E3C; }
     .btn-main { background-color: #6c757d; width: 100%; max-width: 450px; margin: 10px auto; }
 
-    /* Results & Table */
     .results-section { display: none; margin-top: 20px; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85em; }
     th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
@@ -47,6 +47,9 @@
     #patient-form-section { display: none; margin-top: 20px; border-top: 2px solid #6698fd; padding-top: 10px; }
     #preview-img { display: block; max-width: 130px; margin: 10px auto; border-radius: 8px; border: 1px solid #ccc; }
     .non-editable { background-color: #eeeeee; color: #555; cursor: not-allowed; }
+    
+    /* Hidden SVG for barcode generation */
+    #hidden-barcode { display: none; }
   </style>
 </head>
 <body>
@@ -134,9 +137,14 @@
           <button type="button" class="btn-cancel" onclick="location.reload()">Cancel</button>
         </div>
 
-        <button type="button" class="btn-delete" onclick="deletePatient()">Delete This Patient</button>
+        <div class="btn-row">
+          <button type="button" class="btn-delete" onclick="deletePatient()">Delete This Patient</button>
+          <button type="button" class="btn-download" onclick="downloadEditedBarcode()">Download Barcode</button>
+        </div>
       </form>
     </div>
+
+    <svg id="hidden-barcode"></svg>
 
     <button type="button" class="btn-main" onclick="location.href='mainpage.html'">Return to Main Page</button>
   </div>
@@ -224,6 +232,36 @@
       const reader = new FileReader();
       reader.onload = () => document.getElementById('preview-img').src = reader.result;
       if(event.target.files[0]) reader.readAsDataURL(event.target.files[0]);
+    }
+
+    function downloadEditedBarcode() {
+      const regId = document.getElementById('regNumber').value;
+      const patientName = document.getElementById('patientName').value;
+      if (!regId) return alert("No patient selected");
+
+      // Generate barcode in hidden SVG
+      JsBarcode("#hidden-barcode", regId, { format: "CODE128", displayValue: true });
+
+      const svg = document.getElementById("hidden-barcode");
+      const serializer = new XMLSerializer();
+      const source = serializer.serializeToString(svg);
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+      const img = new Image();
+
+      img.onload = function() {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        context.drawImage(img, 0, 0);
+        const pngUrl = canvas.toDataURL("image/png");
+        const downloadLink = document.createElement("a");
+        downloadLink.href = pngUrl;
+        downloadLink.download = `Barcode_${regId}_${patientName.replace(/\s+/g, '_')}.png`;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+      };
+      img.src = "data:image/svg+xml;base64," + btoa(source);
     }
 
     function updatePatient() {
