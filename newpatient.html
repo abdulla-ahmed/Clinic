@@ -5,27 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>New Patient - Al-Kawaz Clinic</title>
   <style>
-    /* ========== YOUR THEME PRESERVED ========== */
     body { font-family: "Times New Roman", Times, serif; background-color: #f9f9f9; margin: 20px; }
     .container { max-width: 600px; margin: auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
     h1, h2 { text-align: center; }
-    
     label { font-weight: bold; margin-top: 15px; display: block; color: #333; }
-    
-    input, select, button { 
-      display: block; width: 100%; max-width: 450px; 
-      margin: 8px auto 18px auto; padding: 12px; 
-      border-radius: 8px; border: 1px solid #ccc; 
-      box-sizing: border-box; font-size: 1em; 
-    }
-    
+    input, select, button { display: block; width: 100%; max-width: 450px; margin: 8px auto 18px auto; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 1em; }
     button { background-color: #6698fd; color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
     button:hover { background-color: #3376fe; border-radius: 12px; }
-    
-    #preview-img, #camera-stream { 
-      display: block; max-width: 250px; margin: 10px auto; 
-      border-radius: 8px; border: 1px solid #ccc; 
-    }
+    #preview-img, #camera-stream { display: block; max-width: 250px; margin: 10px auto; border-radius: 8px; border: 1px solid #ccc; }
     #camera-container { text-align: center; display: none; background: #f0f0f0; padding: 10px; border-radius: 8px; }
     #barcode-container { text-align: center; margin-top: 20px; }
     .btn-camera { background-color: #4CAF50; }
@@ -48,76 +35,21 @@
       <input type="number" id="age" placeholder="Years">
 
       <label>Sex</label>
-      <input list="sex-options" id="sex" placeholder="Select or type Sex">
-      <datalist id="sex-options">
-        <option value="Male">
-        <option value="Female">
-        <option value="Other">
-      </datalist>
-
-      <label>Race</label>
-      <input list="race-options" id="race" placeholder="Select or type Race">
-      <datalist id="race-options">
-        <option value="Arabic">
-        <option value="Kurdish">
-        <option value="Other">
-      </datalist>
-
-      <label>Religion</label>
-      <input list="religion-options" id="religion" placeholder="Select or type Religion">
-      <datalist id="religion-options">
-        <option value="Muslim">
-        <option value="Christian">
-        <option value="Other">
-      </datalist>
+      <input list="sex-options" id="sex"><datalist id="sex-options"><option value="Male"><option value="Female"></datalist>
 
       <label>Occupation</label>
       <input type="text" id="occupation" placeholder="Occupation">
 
-      <label>Blood Group & Rh</label>
-      <input list="blood-options" id="bloodGroup" placeholder="Select or type Blood Group">
-      <datalist id="blood-options">
-        <option value="O+">
-        <option value="O-">
-        <option value="A+">
-        <option value="A-">
-        <option value="B+">
-        <option value="B-">
-        <option value="AB+">
-        <option value="AB-">
-      </datalist>
-
-      <label>Patient Address</label>
-      <input type="text" id="address" placeholder="Home Address">
-
       <label>Patient Telephone</label>
       <input type="tel" id="phone" placeholder="Phone Number">
 
-      <label>Patient Email</label>
-      <input type="email" id="patientEmail" placeholder="example@mail.com">
-
-      <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
-      <h3 style="text-align: center;">Next of Kin Details</h3>
-
-      <label>Next of Kin Address</label>
-      <input type="text" id="kinAddress" placeholder="Kin Address">
-
-      <label>Next of Kin Telephone</label>
-      <input type="tel" id="kinPhone" placeholder="Kin Phone Number">
-
       <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
       <h3 style="text-align: center;">Patient Picture</h3>
-      
-      <label>Upload Existing Photo</label>
-      <input type="file" id="patientPic" accept="image/*" onchange="previewImage(event)">
-      
-      <p style="text-align:center;">- OR -</p>
       
       <button type="button" class="btn-camera" onclick="startCamera()">Open Camera</button>
       
       <div id="camera-container">
         <video id="camera-stream" autoplay playsinline></video>
-        <button type="button" class="btn-switch" onclick="switchCamera()">Switch Camera</button>
         <button type="button" onclick="capturePhoto()">Capture Photo</button>
       </div>
 
@@ -125,8 +57,6 @@
       
       <canvas id="hidden-canvas" style="display:none;"></canvas>
       <canvas id="photo-canvas" style="display:none;"></canvas>
-
-      <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
 
       <label>Entry Date & Time</label>
       <input type="datetime-local" id="entryDateTime">
@@ -145,59 +75,31 @@
 
   <script>
     let currentStream = null;
-    let useBackCamera = false;
 
     window.onload = function() {
       const regId = "AL-" + Math.floor(100000 + Math.random() * 900000);
       document.getElementById('regNumber').value = regId;
-
       const now = new Date();
       const formattedDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
       document.getElementById('entryDateTime').value = formattedDateTime;
-
-      // Preview barcode on screen
       JsBarcode("#barcode-preview", regId, { format: "CODE128", displayValue: true });
     };
 
-    function previewImage(event) {
-      const reader = new FileReader();
-      reader.onload = function() {
-        const output = document.getElementById('preview-img');
-        output.src = reader.result;
-        output.style.display = 'block';
-      };
-      if(event.target.files[0]) reader.readAsDataURL(event.target.files[0]);
-    }
-
     async function startCamera() {
-      if (currentStream) {
-        currentStream.getTracks().forEach(track => track.stop());
-      }
-      const constraints = { video: { facingMode: useBackCamera ? "environment" : "user" } };
       try {
-        currentStream = await navigator.mediaDevices.getUserMedia(constraints);
-        const video = document.getElementById('camera-stream');
-        video.srcObject = currentStream;
+        currentStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        document.getElementById('camera-stream').srcObject = currentStream;
         document.getElementById('camera-container').style.display = 'block';
-      } catch (err) {
-        alert("Camera error: " + err);
-      }
-    }
-
-    function switchCamera() {
-      useBackCamera = !useBackCamera;
-      startCamera();
+      } catch (err) { alert("Camera error: " + err); }
     }
 
     function capturePhoto() {
       const video = document.getElementById('camera-stream');
       const canvas = document.getElementById('photo-canvas');
-      const previewImg = document.getElementById('preview-img');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      canvas.width = video.videoWidth; canvas.height = video.videoHeight;
       canvas.getContext('2d').drawImage(video, 0, 0);
-      previewImg.src = canvas.toDataURL('image/png');
-      previewImg.style.display = 'block';
+      document.getElementById('preview-img').src = canvas.toDataURL('image/png');
+      document.getElementById('preview-img').style.display = 'block';
       currentStream.getTracks().forEach(track => track.stop());
       document.getElementById('camera-container').style.display = 'none';
     }
@@ -210,17 +112,6 @@
       const patientData = {
         regNumber: regNum,
         name: name,
-        email: document.getElementById('patientEmail').value,
-        age: document.getElementById('age').value,
-        sex: document.getElementById('sex').value,
-        race: document.getElementById('race').value,
-        religion: document.getElementById('religion').value,
-        occupation: document.getElementById('occupation').value,
-        bloodGroup: document.getElementById('bloodGroup').value,
-        address: document.getElementById('address').value,
-        phone: document.getElementById('phone').value,
-        kinAddress: document.getElementById('kinAddress').value,
-        kinPhone: document.getElementById('kinPhone').value,
         entryTime: document.getElementById('entryDateTime').value,
         photo: document.getElementById('preview-img').src
       };
@@ -229,26 +120,26 @@
       patients.push(patientData);
       localStorage.setItem('patients', JSON.stringify(patients));
 
-      // NEW ROBUST DOWNLOAD LOGIC
+      // 1. Start PDF Download
       downloadBarcodePDF(regNum, name);
 
-      alert("Patient Record Saved and PDF Barcode Downloaded!");
-      location.href = 'mainpage.html';
+      // 2. Alert and WAIT before redirecting
+      alert("Saving record and downloading PDF...");
+      setTimeout(() => {
+        location.href = 'mainpage.html';
+      }, 1500); // 1.5 second delay ensures the download starts
     }
 
-    // UPDATED: Use the same high-quality canvas logic as edit_patient.html
     function downloadBarcodePDF(regId, patientName) {
       const { jsPDF } = window.jspdf;
       const canvas = document.getElementById("hidden-canvas");
       const ctx = canvas.getContext("2d");
 
-      // 1. Clear and Size Canvas
       canvas.width = 500;
       canvas.height = 500;
       ctx.fillStyle = "white";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // 2. Render Barcode to a temporary canvas first
       const tempCanvas = document.createElement("canvas");
       JsBarcode(tempCanvas, regId, {
         format: "CODE128",
@@ -258,10 +149,7 @@
         height: 100
       });
 
-      // Position barcode on main canvas
       ctx.drawImage(tempCanvas, (canvas.width / 2) - (tempCanvas.width / 2), 220);
-
-      // 3. Draw Header, Line, and Name (Arabic support)
       ctx.fillStyle = "black";
       ctx.textAlign = "center";
       
@@ -269,7 +157,7 @@
       ctx.font = "bold 28px Times New Roman";
       ctx.fillText("Dr. Hayder Al-Kawaz Clinic", 250, 60);
 
-      // Divider Line
+      // Line
       ctx.beginPath();
       ctx.lineWidth = 2;
       ctx.moveTo(50, 85);
@@ -280,14 +168,8 @@
       ctx.font = "bold 24px Arial"; 
       ctx.fillText("Patient Name: " + patientName, 250, 150);
 
-      // 4. Create PDF
       const imgData = canvas.toDataURL("image/png");
-      const doc = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: [100, 100]
-      });
-
+      const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: [100, 100] });
       doc.addImage(imgData, 'PNG', 0, 0, 100, 100);
       doc.save(`Label_${regId}.pdf`);
     }
