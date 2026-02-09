@@ -14,6 +14,14 @@
     h1, h2, h3 { text-align: center; margin-bottom: 10px; }
     label { font-weight: bold; margin-top: 10px; display: block; color: #333; }
     input, select, button { display: block; width: 100%; max-width: 450px; margin: 5px auto 12px auto; padding: 10px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 0.95em; }
+    
+    /* Specific styling for the Date box label */
+    #searchDate::before {
+      content: "Search by Date: ";
+      color: #666;
+      margin-right: 5px;
+    }
+
     .btn-row { display: flex; justify-content: center; gap: 10px; max-width: 450px; margin: auto; }
     .btn-row button { flex: 1; margin: 5px 0; }
     button { color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
@@ -42,7 +50,8 @@
     <div class="search-section">
       <h3>Find Patient</h3>
       <input type="text" id="searchInput" placeholder="Search Name or Reg No.or Barcode">
-      <input type="date" id="searchDate" placeholder="Search Date">
+      <input type="date" id="searchDate">
+      
       <div id="reader"></div>
       <button type="button" style="background-color: #4CAF50;" onclick="startScanner()">Open Barcode Scanner</button>
       <button type="button" style="background-color: #6698fd;" onclick="searchPatient()">Search Patient</button>
@@ -139,7 +148,9 @@
         .filter(p => {
           const nameMatch = p.name.toLowerCase().includes(textQuery);
           const regMatch = p.regNumber.toLowerCase().trim().includes(textQuery);
+          // If a date is selected, check if it matches the start of entryTime
           const dateMatch = dateQuery ? p.entryTime.startsWith(dateQuery) : true;
+          
           return (textQuery || dateQuery) ? ((nameMatch || regMatch) && dateMatch) : false;
         });
 
@@ -157,7 +168,6 @@
       document.getElementById('resultsArea').style.display = 'none';
       document.getElementById('patient-form-section').style.display = 'block';
       
-      // RESTORED ALL FIELDS
       document.getElementById('regNumber').value = p.regNumber;
       document.getElementById('patientName').value = p.name;
       document.getElementById('age').value = p.age || '';
