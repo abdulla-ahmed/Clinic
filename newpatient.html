@@ -15,7 +15,6 @@
     #preview-img, #camera-stream { display: block; max-width: 250px; margin: 10px auto; border-radius: 8px; border: 1px solid #ccc; }
     #camera-container { text-align: center; display: none; background: #f0f0f0; padding: 10px; border-radius: 8px; }
     #barcode-container { text-align: center; margin-top: 20px; }
-    .btn-camera { background-color: #4CAF50; }
   </style>
 </head>
 <body>
@@ -34,60 +33,44 @@
       <input type="number" id="age" placeholder="Years">
 
       <label>Sex</label>
-      <input list="sex-options" id="sex" placeholder="Select or type Sex">
-      <datalist id="sex-options"><option value="Male"><option value="Female"><option value="Other"></datalist>
+      <input list="sex-options" id="sex"><datalist id="sex-options"><option value="Male"><option value="Female"></datalist>
 
       <label>Race</label>
-      <input list="race-options" id="race" placeholder="Select or type Race">
-      <datalist id="race-options"><option value="Arabic"><option value="Kurdish"><option value="Other"></datalist>
+      <input list="race-options" id="race"><datalist id="race-options"><option value="Arabic"><option value="Kurdish"></datalist>
 
       <label>Religion</label>
-      <input list="religion-options" id="religion" placeholder="Select or type Religion">
-      <datalist id="religion-options"><option value="Muslim"><option value="Christian"><option value="Other"></datalist>
+      <input list="religion-options" id="religion"><datalist id="religion-options"><option value="Muslim"><option value="Christian"></datalist>
 
       <label>Occupation</label>
       <input type="text" id="occupation" placeholder="Occupation">
 
-      <label>Blood Group & Rh</label>
-      <input list="blood-options" id="bloodGroup" placeholder="Select or type Blood Group">
-      <datalist id="blood-options">
-        <option value="O+"><option value="O-"><option value="A+"><option value="A-"><option value="B+"><option value="B-"><option value="AB+"><option value="AB-">
-      </datalist>
+      <label>Blood Group</label>
+      <input list="blood-options" id="bloodGroup">
+      <datalist id="blood-options"><option value="O+"><option value="O-"><option value="A+"><option value="A-"><option value="B+"><option value="B-"><option value="AB+"><option value="AB-"></datalist>
 
       <label>Patient Address</label>
-      <input type="text" id="address" placeholder="Home Address">
+      <input type="text" id="address">
 
-      <label>Patient Telephone</label>
-      <input type="tel" id="phone" placeholder="Phone Number">
+      <label>Telephone</label>
+      <input type="tel" id="phone">
 
-      <label>Patient Email</label>
-      <input type="email" id="patientEmail" placeholder="example@mail.com">
-
-      <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
-      <h3 style="text-align: center;">Next of Kin Details</h3>
-
+      <hr>
+      <h3>Next of Kin</h3>
       <label>Next of Kin Address</label>
-      <input type="text" id="kinAddress" placeholder="Kin Address">
-
+      <input type="text" id="kinAddress">
       <label>Next of Kin Telephone</label>
-      <input type="tel" id="kinPhone" placeholder="Kin Phone Number">
+      <input type="tel" id="kinPhone">
 
-      <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
-      <h3 style="text-align: center;">Patient Picture</h3>
-      
-      <button type="button" class="btn-camera" onclick="startCamera()">Open Camera</button>
-      
+      <hr>
+      <button type="button" style="background-color: #4CAF50;" onclick="startCamera()">Open Camera</button>
       <div id="camera-container">
         <video id="camera-stream" autoplay playsinline style="width:100%; max-width:300px;"></video>
         <button type="button" onclick="capturePhoto()">Capture Photo</button>
       </div>
-
       <img id="preview-img" src="#" alt="Preview" style="display:none;">
       
       <canvas id="hidden-canvas" style="display:none;"></canvas>
       <canvas id="photo-canvas" style="display:none;"></canvas>
-
-      <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
 
       <label>Entry Date & Time</label>
       <input type="datetime-local" id="entryDateTime">
@@ -96,8 +79,8 @@
         <svg id="barcode-preview"></svg>
       </div>
 
-      <button type="button" onclick="processRegistration()">Save Patient Information</button>
-      <button type="button" style="background-color: #6c757d;" onclick="location.href='mainpage.html'">Back to Main Menu</button>
+      <button type="button" id="saveBtn" onclick="processRegistration()">Save & Download PDF</button>
+      <button type="button" style="background-color: #6c757d;" onclick="location.href='mainpage.html'">Cancel</button>
     </form>
   </div>
 
@@ -135,12 +118,18 @@
       document.getElementById('camera-container').style.display = 'none';
     }
 
-    function processRegistration() {
+    async function processRegistration() {
+      const saveBtn = document.getElementById('saveBtn');
       const name = document.getElementById('patientName').value;
       const regNum = document.getElementById('regNumber').value;
+      
       if (!name) return alert("Patient Name is required!");
 
-      // 1. Save all data to LocalStorage
+      // 1. Change button status so user doesn't click twice
+      saveBtn.innerText = "Processing...";
+      saveBtn.disabled = true;
+
+      // 2. Save Data
       const patientData = {
         regNumber: regNum,
         name: name,
@@ -152,7 +141,6 @@
         bloodGroup: document.getElementById('bloodGroup').value,
         address: document.getElementById('address').value,
         phone: document.getElementById('phone').value,
-        email: document.getElementById('patientEmail').value,
         kinAddress: document.getElementById('kinAddress').value,
         kinPhone: document.getElementById('kinPhone').value,
         entryTime: document.getElementById('entryDateTime').value,
@@ -163,11 +151,14 @@
       patients.push(patientData);
       localStorage.setItem('patients', JSON.stringify(patients));
 
-      // 2. Start PDF Download
+      // 3. Trigger Download
       downloadLabel(regNum, name);
 
-      // 3. Pause for the browser to finish download, then redirect
-      alert("Registration Successful! Label is downloading. Click OK to return to the menu.");
+      // 4. Force a 2-second delay to ensure browser handoff
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // 5. Alert and Redirect
+      alert("Registration Saved and Label Downloaded!");
       location.href = 'mainpage.html';
     }
 
@@ -184,11 +175,9 @@
 
       ctx.drawImage(tempCanvas, (canvas.width / 2) - (tempCanvas.width / 2), 220);
       ctx.fillStyle = "black"; ctx.textAlign = "center";
-      
       ctx.font = "bold 28px Times New Roman";
       ctx.fillText("Dr. Hayder Al-Kawaz Clinic", 250, 60);
       ctx.beginPath(); ctx.lineWidth = 2; ctx.moveTo(50, 85); ctx.lineTo(450, 85); ctx.stroke();
-      
       ctx.font = "bold 24px Arial"; 
       ctx.fillText("Patient Name: " + patientName, 250, 150);
 
