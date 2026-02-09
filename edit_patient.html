@@ -24,15 +24,21 @@
     button:hover { background-color: #3376fe; border-radius: 12px; }
     
     /* Search Results Table */
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9em; }
-    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+    .results-section { display: none; margin-top: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9em; }
+    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
     th { background-color: #6698fd; color: white; }
-    tr:hover { background-color: #f1f1f1; cursor: pointer; }
+    tr:nth-child(even) { background-color: #f2f2f2; }
+    tr:hover { background: #ddecff; cursor: pointer; }
 
     .search-section { background: #eef4ff; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #6698fd; }
-    #reader { width: 100%; max-width: 400px; margin: auto; }
+    #reader { width: 100%; max-width: 400px; margin: 10px auto; border-radius: 8px; overflow: hidden; }
+    
     #patient-form-section { display: none; margin-top: 30px; border-top: 2px solid #6698fd; padding-top: 20px; }
-    #preview-img { display: block; max-width: 150px; margin: 10px auto; border-radius: 8px; }
+    #preview-img { display: block; max-width: 150px; margin: 10px auto; border-radius: 8px; border: 1px solid #ccc; }
+    
+    .btn-camera { background-color: #4CAF50; }
+    .btn-secondary { background-color: #6c757d; }
   </style>
 </head>
 <body>
@@ -41,25 +47,26 @@
     <h1>Edit Patient Information</h1>
 
     <div class="search-section">
-      <h3>Search Options</h3>
-      <input type="text" id="searchInput" placeholder="Search by Name or Reg No...">
+      <h3>Find Patient</h3>
+      <input type="text" id="searchInput" placeholder="Search Name, Reg No, or Barcode...">
+      <label style="text-align:center;">OR Search by Date</label>
       <input type="date" id="searchDate">
       
-      <button type="button" onclick="searchPatient()">Search</button>
-      <button type="button" style="background-color: #4CAF50;" onclick="startScanner()">Scan Barcode (Camera)</button>
+      <button type="button" onclick="searchPatient()">Search Patient</button>
+      <button type="button" class="btn-camera" onclick="startScanner()">Scan Barcode with Camera</button>
       
       <div id="reader"></div>
     </div>
 
-    <div id="resultsArea" style="display:none;">
-      <h3>Matching Patients</h3>
-      <p style="text-align:center; font-size: 0.8em;">Click on a patient to edit their details</p>
-      <table id="resultsTable">
+    <div id="resultsArea" class="results-section">
+      <h3>Multiple Patients Found</h3>
+      <p style="text-align:center; font-style: italic;">Select the correct patient to edit:</p>
+      <table>
         <thead>
           <tr>
             <th>Name</th>
             <th>Reg No</th>
-            <th>Date</th>
+            <th>Visit Date</th>
           </tr>
         </thead>
         <tbody id="resultsBody"></tbody>
@@ -67,7 +74,7 @@
     </div>
 
     <div id="patient-form-section">
-      <h2>Editing Patient Details</h2>
+      <h2 style="color: #3376fe;">Editing Patient Profile</h2>
       <form id="editForm">
         <label>Registration Number</label>
         <input type="text" id="regNumber" readonly style="background-color: #eee;">
@@ -90,49 +97,68 @@
         <input list="religion-options" id="religion">
         <datalist id="religion-options"><option value="Muslim"><option value="Christian"><option value="Other"></datalist>
 
-        <label>Blood Group</label>
-        <input list="blood-options" id="bloodGroup">
-        <datalist id="blood-options"><option value="O+"><option value="O-"><option value="A+"><option value="A-"><option value="B+"><option value="B-"><option value="AB+"><option value="AB-"></datalist>
+        <label>Occupation</label>
+        <input type="text" id="occupation">
 
-        <label>Patient Telephone</label>
+        <label>Blood Group & Rh</label>
+        <input list="blood-options" id="bloodGroup">
+        <datalist id="blood-options">
+          <option value="O+"><option value="O-"><option value="A+"><option value="A-"><option value="B+"><option value="B-"><option value="AB+"><option value="AB-">
+        </datalist>
+
+        <label>Address</label>
+        <input type="text" id="address">
+
+        <label>Telephone</label>
         <input type="tel" id="phone">
 
-        <label>Patient Email</label>
+        <label>Email</label>
         <input type="email" id="patientEmail">
+
+        <label>Next of Kin Address</label>
+        <input type="text" id="kinAddress">
+
+        <label>Next of Kin Telephone</label>
+        <input type="tel" id="kinPhone">
 
         <label>Entry Date & Time</label>
         <input type="datetime-local" id="entryDateTime">
 
         <label>Patient Photo</label>
-        <img id="preview-img" src="" alt="No Image">
+        <img id="preview-img" src="" alt="No Image Saved">
         <input type="file" id="patientPic" accept="image/*" onchange="updatePreview(event)">
 
         <button type="button" onclick="updatePatient()">Save Changes</button>
       </form>
     </div>
 
-    <button type="button" style="background-color: #6c757d; margin-top:20px;" onclick="location.href='mainpage.html'">Return to Main Page</button>
+    <button type="button" class="btn-secondary" onclick="location.href='mainpage.html'">Return to Main Page</button>
   </div>
 
   <script>
     let allPatients = JSON.parse(localStorage.getItem('patients')) || [];
     let selectedIndex = -1;
 
-    // 1. Search Logic with Table
+    // 1. SEARCH FUNCTION
     function searchPatient() {
-      const textQuery = document.getElementById('searchInput').value.toLowerCase();
+      const textQuery = document.getElementById('searchInput').value.toLowerCase().trim();
       const dateQuery = document.getElementById('searchDate').value;
       const resultsBody = document.getElementById('resultsBody');
       const resultsArea = document.getElementById('resultsArea');
       
-      resultsBody.innerHTML = ""; // Clear old results
+      resultsBody.innerHTML = ""; 
+      document.getElementById('patient-form-section').style.display = 'none';
 
       const matches = allPatients.map((p, index) => ({...p, originalIndex: index}))
         .filter(p => {
           const nameMatch = p.name.toLowerCase().includes(textQuery);
-          const regMatch = p.regNumber.toLowerCase().includes(textQuery);
+          const regMatch = p.regNumber.toLowerCase().trim() === textQuery;
           const dateMatch = dateQuery ? p.entryTime.startsWith(dateQuery) : true;
-          return (textQuery || dateQuery) ? ((nameMatch || regMatch) && dateMatch) : false;
+          
+          if (textQuery && dateQuery) return (nameMatch || regMatch) && dateMatch;
+          if (textQuery) return (nameMatch || regMatch);
+          if (dateQuery) return dateMatch;
+          return false;
         });
 
       if (matches.length > 0) {
@@ -146,18 +172,20 @@
             </tr>`;
           resultsBody.innerHTML += row;
         });
+        resultsArea.scrollIntoView({ behavior: 'smooth' });
       } else {
-        alert("No patients found.");
+        alert("No patient found with these details.");
         resultsArea.style.display = "none";
       }
     }
 
-    // 2. Load selected patient into form
+    // 2. LOAD PATIENT INTO FORM
     function loadPatient(index) {
       selectedIndex = index;
       const p = allPatients[index];
+      
+      document.getElementById('resultsArea').style.display = 'none';
       document.getElementById('patient-form-section').style.display = 'block';
-      document.getElementById('resultsArea').style.display = 'none'; // Hide table
 
       document.getElementById('regNumber').value = p.regNumber;
       document.getElementById('patientName').value = p.name;
@@ -166,22 +194,29 @@
       document.getElementById('sex').value = p.sex || '';
       document.getElementById('race').value = p.race || '';
       document.getElementById('religion').value = p.religion || '';
+      document.getElementById('occupation').value = p.occupation || '';
       document.getElementById('bloodGroup').value = p.bloodGroup || '';
+      document.getElementById('address').value = p.address || '';
       document.getElementById('phone').value = p.phone || '';
+      document.getElementById('kinAddress').value = p.kinAddress || '';
+      document.getElementById('kinPhone').value = p.kinPhone || '';
       document.getElementById('entryDateTime').value = p.entryTime || '';
       document.getElementById('preview-img').src = p.photo || '';
+      
+      document.getElementById('patient-form-section').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // 3. Barcode Scanner Logic
+    // 3. SCANNER LOGIC
     function startScanner() {
       const html5QrCode = new Html5Qrcode("reader");
       html5QrCode.start(
         { facingMode: "environment" }, 
-        { fps: 10, qrbox: { width: 250, height: 150 } },
+        { fps: 15, qrbox: { width: 250, height: 150 } },
         (decodedText) => {
-          document.getElementById('searchInput').value = decodedText;
-          searchPatient();
-          html5QrCode.stop();
+          document.getElementById('searchInput').value = decodedText.trim();
+          html5QrCode.stop().then(() => {
+            searchPatient();
+          });
         }
       ).catch(err => alert("Camera error: " + err));
     }
@@ -192,23 +227,30 @@
       if(event.target.files[0]) reader.readAsDataURL(event.target.files[0]);
     }
 
+    // 4. SAVE CHANGES
     function updatePatient() {
+      if (selectedIndex === -1) return;
+
       allPatients[selectedIndex] = {
-        ...allPatients[selectedIndex],
+        regNumber: document.getElementById('regNumber').value,
         name: document.getElementById('patientName').value,
         email: document.getElementById('patientEmail').value,
         age: document.getElementById('age').value,
         sex: document.getElementById('sex').value,
         race: document.getElementById('race').value,
         religion: document.getElementById('religion').value,
+        occupation: document.getElementById('occupation').value,
         bloodGroup: document.getElementById('bloodGroup').value,
+        address: document.getElementById('address').value,
         phone: document.getElementById('phone').value,
+        kinAddress: document.getElementById('kinAddress').value,
+        kinPhone: document.getElementById('kinPhone').value,
         entryTime: document.getElementById('entryDateTime').value,
         photo: document.getElementById('preview-img').src
       };
 
       localStorage.setItem('patients', JSON.stringify(allPatients));
-      alert("Changes Saved!");
+      alert("Information Updated Successfully!");
       location.reload();
     }
   </script>
