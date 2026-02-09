@@ -6,41 +6,47 @@
   <title>Edit Patient - Al-Kawaz Clinic</title>
   <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
-    /* ========== YOUR THEME PRESERVED ========== */
-    body { font-family: "Times New Roman", Times, serif; background-color: #f9f9f9; margin: 20px; }
-    .container { max-width: 650px; margin: auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
-    h1, h2, h3 { text-align: center; }
+    /* ========== THEME & LAYOUT OPTIMIZATION ========== */
+    body { font-family: "Times New Roman", Times, serif; background-color: #f9f9f9; margin: 20px; font-size: 0.9em; }
+    .container { max-width: 650px; margin: auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
+    h1, h2, h3 { text-align: center; margin-bottom: 10px; }
     
-    label { font-weight: bold; margin-top: 15px; display: block; color: #333; }
+    label { font-weight: bold; margin-top: 10px; display: block; color: #333; }
     
+    /* Smaller text size to fit one line */
     input, select, button { 
       display: block; width: 100%; max-width: 450px; 
-      margin: 8px auto 18px auto; padding: 12px; 
+      margin: 5px auto 12px auto; padding: 10px; 
       border-radius: 8px; border: 1px solid #ccc; 
-      box-sizing: border-box; font-size: 1em; 
+      box-sizing: border-box; font-size: 0.95em; 
     }
     
-    button { background-color: #6698fd; color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
-    button:hover { background-color: #3376fe; border-radius: 12px; }
-    
+    /* Button Layouts */
+    .btn-row { display: flex; justify-content: center; gap: 10px; max-width: 450px; margin: auto; }
+    .btn-row button { flex: 1; margin: 5px 0; }
+
+    button { color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
+    .btn-save { background-color: #6698fd; }
+    .btn-save:hover { background-color: #3376fe; }
+    .btn-cancel { background-color: #9e9e9e; }
+    .btn-delete { background-color: #e53935; width: 100%; max-width: 450px; margin: 10px auto; }
+    .btn-delete:hover { background-color: #c62828; }
+    .btn-main { background-color: #6c757d; width: 100%; max-width: 450px; margin: 10px auto; }
+
+    /* Results & Table */
     .results-section { display: none; margin-top: 20px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9em; }
-    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85em; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
     th { background-color: #6698fd; color: white; }
-    tr:nth-child(even) { background-color: #f2f2f2; }
     tr:hover { background: #ddecff; cursor: pointer; }
 
-    .search-section { background: #eef4ff; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #6698fd; }
+    .search-section { background: #eef4ff; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #6698fd; }
+    #reader { width: 100%; max-width: 400px; margin: 10px auto; border-radius: 8px; border: 2px solid #6698fd; display: none;}
+    #scan-status { text-align: center; color: green; font-weight: bold; display: none; }
     
-    /* Camera Viewer */
-    #reader { width: 100%; max-width: 400px; margin: 10px auto; border-radius: 8px; overflow: hidden; border: 2px solid #6698fd; display: none;}
-    #scan-status { text-align: center; color: green; font-weight: bold; display: none; margin-bottom: 10px; }
-    
-    #patient-form-section { display: none; margin-top: 30px; border-top: 2px solid #6698fd; padding-top: 20px; }
-    #preview-img { display: block; max-width: 150px; margin: 10px auto; border-radius: 8px; border: 1px solid #ccc; }
-    
-    .btn-camera { background-color: #4CAF50; }
-    .btn-secondary { background-color: #6c757d; }
+    #patient-form-section { display: none; margin-top: 20px; border-top: 2px solid #6698fd; padding-top: 10px; }
+    #preview-img { display: block; max-width: 130px; margin: 10px auto; border-radius: 8px; border: 1px solid #ccc; }
+    .non-editable { background-color: #eeeeee; color: #555; cursor: not-allowed; }
   </style>
 </head>
 <body>
@@ -51,25 +57,20 @@
     <div class="search-section">
       <h3>Find Patient</h3>
       <input type="text" id="searchInput" placeholder="Search Name, Reg No, or Barcode...">
-      <label style="text-align:center;">OR Search by Date</label>
       <input type="date" id="searchDate">
       
-      <div id="scan-status">✔ Barcode Scanned! Please wait...</div>
+      <div id="scan-status">✔ Barcode Scanned! Processing...</div>
       <div id="reader"></div>
 
-      <button type="button" class="btn-camera" id="scanBtn" onclick="startScanner()">Open Barcode Scanner</button>
-      <button type="button" onclick="searchPatient()">Search Patient</button>
+      <button type="button" style="background-color: #4CAF50;" onclick="startScanner()">Open Barcode Scanner</button>
+      <button type="button" style="background-color: #6698fd;" onclick="searchPatient()">Search Patient</button>
     </div>
 
     <div id="resultsArea" class="results-section">
       <h3>Search Results</h3>
-      <table id="resultsTable">
+      <table>
         <thead>
-          <tr>
-            <th>Name</th>
-            <th>Reg No</th>
-            <th>Visit Date</th>
-          </tr>
+          <tr><th>Name</th><th>Reg No</th><th>Visit Date</th></tr>
         </thead>
         <tbody id="resultsBody"></tbody>
       </table>
@@ -78,8 +79,8 @@
     <div id="patient-form-section">
       <h2 style="color: #3376fe;">Editing Patient Profile</h2>
       <form id="editForm">
-        <label>Registration Number</label>
-        <input type="text" id="regNumber" readonly style="background-color: #eee;">
+        <label>Registration Number (Non-Editable)</label>
+        <input type="text" id="regNumber" class="non-editable" readonly>
 
         <label>Patient Name</label>
         <input type="text" id="patientName" required>
@@ -93,16 +94,16 @@
 
         <label>Race</label>
         <input list="race-options" id="race">
-        <datalist id="race-options"><option value="Arabic"><option value="Kurdish"><option value="Other"></datalist>
+        <datalist id="race-options"><option value="Arabic"><option value="Kurdish"></datalist>
 
         <label>Religion</label>
         <input list="religion-options" id="religion">
-        <datalist id="religion-options"><option value="Muslim"><option value="Christian"><option value="Other"></datalist>
+        <datalist id="religion-options"><option value="Muslim"><option value="Christian"></datalist>
 
         <label>Occupation</label>
         <input type="text" id="occupation">
 
-        <label>Blood Group & Rh</label>
+        <label>Blood Group</label>
         <input list="blood-options" id="bloodGroup">
         <datalist id="blood-options"><option value="O+"><option value="O-"><option value="A+"><option value="A-"><option value="B+"><option value="B-"><option value="AB+"><option value="AB-"></datalist>
 
@@ -115,22 +116,29 @@
         <label>Email</label>
         <input type="email" id="patientEmail">
 
-        <label>Next of Kin Details</label>
-        <input type="text" id="kinAddress" placeholder="Kin Address">
-        <input type="tel" id="kinPhone" placeholder="Kin Phone">
+        <label>Kin Address</label>
+        <input type="text" id="kinAddress">
+
+        <label>Kin Phone</label>
+        <input type="tel" id="kinPhone">
 
         <label>Entry Date & Time</label>
         <input type="datetime-local" id="entryDateTime">
 
         <label>Patient Photo</label>
-        <img id="preview-img" src="" alt="No Image Saved">
+        <img id="preview-img" src="" alt="No Image">
         <input type="file" id="patientPic" accept="image/*" onchange="updatePreview(event)">
 
-        <button type="button" onclick="updatePatient()">Save Changes</button>
+        <div class="btn-row">
+          <button type="button" class="btn-save" onclick="updatePatient()">Save Changes</button>
+          <button type="button" class="btn-cancel" onclick="location.reload()">Cancel</button>
+        </div>
+
+        <button type="button" class="btn-delete" onclick="deletePatient()">Delete This Patient</button>
       </form>
     </div>
 
-    <button type="button" class="btn-secondary" onclick="location.href='mainpage.html'">Return to Main Page</button>
+    <button type="button" class="btn-main" onclick="location.href='mainpage.html'">Return to Main Page</button>
   </div>
 
   <script>
@@ -151,26 +159,19 @@
           const nameMatch = p.name.toLowerCase().includes(textQuery);
           const regMatch = p.regNumber.toLowerCase().trim().includes(textQuery);
           const dateMatch = dateQuery ? p.entryTime.startsWith(dateQuery) : true;
-          
-          if (textQuery && dateQuery) return (nameMatch || regMatch) && dateMatch;
-          if (textQuery) return (nameMatch || regMatch);
-          if (dateQuery) return dateMatch;
-          return false;
+          return (textQuery || dateQuery) ? ((nameMatch || regMatch) && dateMatch) : false;
         });
 
       if (matches.length > 0) {
         resultsArea.style.display = "block";
         matches.forEach(p => {
           const row = `<tr onclick="loadPatient(${p.originalIndex})">
-              <td>${p.name}</td>
-              <td>${p.regNumber}</td>
-              <td>${p.entryTime.split('T')[0]}</td>
+              <td>${p.name}</td><td>${p.regNumber}</td><td>${p.entryTime.split('T')[0]}</td>
             </tr>`;
           resultsBody.innerHTML += row;
         });
       } else {
-        alert("No patient found. Please check your spelling or Registration Number.");
-        resultsArea.style.display = "none";
+        alert("Patient not found.");
       }
     }
 
@@ -201,23 +202,18 @@
       const readerElem = document.getElementById('reader');
       const statusElem = document.getElementById('scan-status');
       readerElem.style.display = 'block';
-      
       const html5QrCode = new Html5Qrcode("reader");
-      
       html5QrCode.start(
         { facingMode: "environment" }, 
-        { fps: 20, qrbox: { width: 280, height: 180 } },
+        { fps: 20, qrbox: { width: 250, height: 150 } },
         (decodedText) => {
-          // 1. Success feedback
           statusElem.style.display = 'block';
           document.getElementById('searchInput').value = decodedText.trim();
-          
-          // 2. The Delay (1 second)
           setTimeout(() => {
             html5QrCode.stop().then(() => {
               readerElem.style.display = 'none';
               statusElem.style.display = 'none';
-              searchPatient(); // Trigger search
+              searchPatient();
             });
           }, 1000); 
         }
@@ -233,7 +229,7 @@
     function updatePatient() {
       if (selectedIndex === -1) return;
       allPatients[selectedIndex] = {
-        regNumber: document.getElementById('regNumber').value,
+        ...allPatients[selectedIndex],
         name: document.getElementById('patientName').value,
         email: document.getElementById('patientEmail').value,
         age: document.getElementById('age').value,
@@ -250,8 +246,18 @@
         photo: document.getElementById('preview-img').src
       };
       localStorage.setItem('patients', JSON.stringify(allPatients));
-      alert("Information Updated Successfully!");
+      alert("Information Updated!");
       location.reload();
+    }
+
+    function deletePatient() {
+      if (selectedIndex === -1) return;
+      if (confirm("Are you sure you want to PERMANENTLY delete this patient record?")) {
+        allPatients.splice(selectedIndex, 1);
+        localStorage.setItem('patients', JSON.stringify(allPatients));
+        alert("Patient Record Deleted.");
+        location.reload();
+      }
     }
   </script>
 </body>
