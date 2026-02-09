@@ -6,8 +6,9 @@
   <title>Edit Patient - Al-Kawaz Clinic</title>
   <script src="https://unpkg.com/html5-qrcode"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  
   <style>
-    /* ========== THEME & LAYOUT OPTIMIZATION ========== */
     body { font-family: "Times New Roman", Times, serif; background-color: #f9f9f9; margin: 20px; font-size: 0.9em; }
     .container { max-width: 650px; margin: auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
     h1, h2, h3 { text-align: center; margin-bottom: 10px; }
@@ -26,12 +27,9 @@
 
     button { color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
     .btn-save { background-color: #6698fd; }
-    .btn-save:hover { background-color: #3376fe; }
     .btn-cancel { background-color: #9e9e9e; }
     .btn-delete { background-color: #e53935; }
-    .btn-delete:hover { background-color: #c62828; }
     .btn-download { background-color: #4CAF50; }
-    .btn-download:hover { background-color: #388E3C; }
     .btn-main { background-color: #6c757d; width: 100%; max-width: 450px; margin: 10px auto; }
 
     .results-section { display: none; margin-top: 20px; }
@@ -42,14 +40,9 @@
 
     .search-section { background: #eef4ff; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #6698fd; }
     #reader { width: 100%; max-width: 400px; margin: 10px auto; border-radius: 8px; border: 2px solid #6698fd; display: none;}
-    #scan-status { text-align: center; color: green; font-weight: bold; display: none; }
-    
     #patient-form-section { display: none; margin-top: 20px; border-top: 2px solid #6698fd; padding-top: 10px; }
     #preview-img { display: block; max-width: 130px; margin: 10px auto; border-radius: 8px; border: 1px solid #ccc; }
     .non-editable { background-color: #eeeeee; color: #555; cursor: not-allowed; }
-    
-    /* Hidden SVG for barcode generation */
-    #hidden-barcode { display: none; }
   </style>
 </head>
 <body>
@@ -61,10 +54,7 @@
       <h3>Find Patient</h3>
       <input type="text" id="searchInput" placeholder="Search Name, Reg No, or Barcode...">
       <input type="date" id="searchDate">
-      
-      <div id="scan-status">✔ Barcode Scanned! Processing...</div>
       <div id="reader"></div>
-
       <button type="button" style="background-color: #4CAF50;" onclick="startScanner()">Open Barcode Scanner</button>
       <button type="button" style="background-color: #6698fd;" onclick="searchPatient()">Search Patient</button>
     </div>
@@ -72,9 +62,7 @@
     <div id="resultsArea" class="results-section">
       <h3>Search Results</h3>
       <table>
-        <thead>
-          <tr><th>Name</th><th>Reg No</th><th>Visit Date</th></tr>
-        </thead>
+        <thead><tr><th>Name</th><th>Reg No</th><th>Visit Date</th></tr></thead>
         <tbody id="resultsBody"></tbody>
       </table>
     </div>
@@ -82,52 +70,20 @@
     <div id="patient-form-section">
       <h2 style="color: #3376fe;">Editing Patient Profile</h2>
       <form id="editForm">
-        <label>Registration Number (Non-Editable)</label>
+        <label>Registration Number</label>
         <input type="text" id="regNumber" class="non-editable" readonly>
-
         <label>Patient Name</label>
         <input type="text" id="patientName" required>
-
         <label>Age</label>
         <input type="number" id="age">
-
         <label>Sex</label>
-        <input list="sex-options" id="sex">
-        <datalist id="sex-options"><option value="Male"><option value="Female"><option value="Other"></datalist>
-
-        <label>Race</label>
-        <input list="race-options" id="race">
-        <datalist id="race-options"><option value="Arabic"><option value="Kurdish"></datalist>
-
-        <label>Religion</label>
-        <input list="religion-options" id="religion">
-        <datalist id="religion-options"><option value="Muslim"><option value="Christian"></datalist>
-
+        <input list="sex-options" id="sex"><datalist id="sex-options"><option value="Male"><option value="Female"></datalist>
         <label>Occupation</label>
         <input type="text" id="occupation">
-
-        <label>Blood Group</label>
-        <input list="blood-options" id="bloodGroup">
-        <datalist id="blood-options"><option value="O+"><option value="O-"><option value="A+"><option value="A-"><option value="B+"><option value="B-"><option value="AB+"><option value="AB-"></datalist>
-
-        <label>Address</label>
-        <input type="text" id="address">
-
         <label>Telephone</label>
         <input type="tel" id="phone">
-
-        <label>Email</label>
-        <input type="email" id="patientEmail">
-
-        <label>Kin Address</label>
-        <input type="text" id="kinAddress">
-
-        <label>Kin Phone</label>
-        <input type="tel" id="kinPhone">
-
         <label>Entry Date & Time</label>
         <input type="datetime-local" id="entryDateTime">
-
         <label>Patient Photo</label>
         <img id="preview-img" src="" alt="No Image">
         <input type="file" id="patientPic" accept="image/*" onchange="updatePreview(event)">
@@ -139,12 +95,12 @@
 
         <div class="btn-row">
           <button type="button" class="btn-delete" onclick="deletePatient()">Delete This Patient</button>
-          <button type="button" class="btn-download" onclick="downloadEditedBarcode()">Download Barcode</button>
+          <button type="button" class="btn-download" onclick="downloadAsPDF()">Download PDF</button>
         </div>
       </form>
     </div>
 
-    <svg id="hidden-barcode"></svg>
+    <canvas id="hidden-canvas" style="display:none;"></canvas>
 
     <button type="button" class="btn-main" onclick="location.href='mainpage.html'">Return to Main Page</button>
   </div>
@@ -153,12 +109,12 @@
     let allPatients = JSON.parse(localStorage.getItem('patients')) || [];
     let selectedIndex = -1;
 
+    // Standard Search and Load functions
     function searchPatient() {
       const textQuery = document.getElementById('searchInput').value.toLowerCase().trim();
       const dateQuery = document.getElementById('searchDate').value;
       const resultsBody = document.getElementById('resultsBody');
       const resultsArea = document.getElementById('resultsArea');
-      
       resultsBody.innerHTML = ""; 
       document.getElementById('patient-form-section').style.display = 'none';
 
@@ -173,14 +129,9 @@
       if (matches.length > 0) {
         resultsArea.style.display = "block";
         matches.forEach(p => {
-          const row = `<tr onclick="loadPatient(${p.originalIndex})">
-              <td>${p.name}</td><td>${p.regNumber}</td><td>${p.entryTime.split('T')[0]}</td>
-            </tr>`;
-          resultsBody.innerHTML += row;
+          resultsBody.innerHTML += `<tr onclick="loadPatient(${p.originalIndex})"><td>${p.name}</td><td>${p.regNumber}</td><td>${p.entryTime.split('T')[0]}</td></tr>`;
         });
-      } else {
-        alert("Patient not found.");
-      }
+      } else { alert("Not found."); }
     }
 
     function loadPatient(index) {
@@ -188,114 +139,91 @@
       const p = allPatients[index];
       document.getElementById('resultsArea').style.display = 'none';
       document.getElementById('patient-form-section').style.display = 'block';
-
       document.getElementById('regNumber').value = p.regNumber;
       document.getElementById('patientName').value = p.name;
-      document.getElementById('patientEmail').value = p.email || '';
-      document.getElementById('age').value = p.age || '';
-      document.getElementById('sex').value = p.sex || '';
-      document.getElementById('race').value = p.race || '';
-      document.getElementById('religion').value = p.religion || '';
       document.getElementById('occupation').value = p.occupation || '';
-      document.getElementById('bloodGroup').value = p.bloodGroup || '';
-      document.getElementById('address').value = p.address || '';
       document.getElementById('phone').value = p.phone || '';
-      document.getElementById('kinAddress').value = p.kinAddress || '';
-      document.getElementById('kinPhone').value = p.kinPhone || '';
       document.getElementById('entryDateTime').value = p.entryTime || '';
       document.getElementById('preview-img').src = p.photo || '';
     }
 
+    // NEW PDF DOWNLOAD LOGIC
+    async function downloadAsPDF() {
+      const { jsPDF } = window.jspdf;
+      const regId = document.getElementById('regNumber').value;
+      const name = document.getElementById('patientName').value;
+      const canvas = document.getElementById("hidden-canvas");
+
+      if (!regId) return alert("Select a patient first");
+
+      // 1. Generate Barcode on hidden canvas
+      JsBarcode(canvas, regId, {
+        format: "CODE128",
+        displayValue: true,
+        fontSize: 20
+      });
+
+      // 2. Convert Canvas to Image Data
+      const imgData = canvas.toDataURL("image/png");
+
+      // 3. Create PDF
+      const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: [80, 80] // Small square format perfect for clinic labels
+      });
+
+      doc.setFont("times", "bold");
+      doc.setFontSize(12);
+      doc.text("Al-Kawaz Clinic", 40, 10, { align: "center" });
+      
+      doc.setFontSize(10);
+      doc.setFont("times", "normal");
+      doc.text(`Patient: ${name}`, 10, 20);
+      doc.text(`ID: ${regId}`, 10, 25);
+
+      // Add Barcode Image
+      doc.addImage(imgData, 'PNG', 5, 30, 70, 30);
+
+      // 4. Save PDF
+      doc.save(`Patient_${regId}.pdf`);
+    }
+
     function startScanner() {
       const readerElem = document.getElementById('reader');
-      const statusElem = document.getElementById('scan-status');
       readerElem.style.display = 'block';
       const html5QrCode = new Html5Qrcode("reader");
-      html5QrCode.start(
-        { facingMode: "environment" }, 
-        { fps: 20, qrbox: { width: 250, height: 150 } },
-        (decodedText) => {
-          statusElem.style.display = 'block';
+      html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, (decodedText) => {
           document.getElementById('searchInput').value = decodedText.trim();
           setTimeout(() => {
             html5QrCode.stop().then(() => {
               readerElem.style.display = 'none';
-              statusElem.style.display = 'none';
               searchPatient();
             });
-          }, 1000); 
-        }
-      ).catch(err => alert("Camera Error: " + err));
+          }, 800); 
+      }).catch(err => alert("Camera Error: " + err));
+    }
+
+    function updatePatient() {
+      if (selectedIndex === -1) return;
+      allPatients[selectedIndex] = { ...allPatients[selectedIndex], name: document.getElementById('patientName').value, occupation: document.getElementById('occupation').value, phone: document.getElementById('phone').value, entryTime: document.getElementById('entryDateTime').value, photo: document.getElementById('preview-img').src };
+      localStorage.setItem('patients', JSON.stringify(allPatients));
+      alert("Updated!");
+      location.reload();
+    }
+
+    function deletePatient() {
+      if (confirm("Delete this patient?")) {
+        allPatients.splice(selectedIndex, 1);
+        localStorage.setItem('patients', JSON.stringify(allPatients));
+        location.reload();
+      }
     }
 
     function updatePreview(event) {
       const reader = new FileReader();
       reader.onload = () => document.getElementById('preview-img').src = reader.result;
       if(event.target.files[0]) reader.readAsDataURL(event.target.files[0]);
-    }
-
-    function downloadEditedBarcode() {
-      const regId = document.getElementById('regNumber').value;
-      const patientName = document.getElementById('patientName').value;
-      if (!regId) return alert("No patient selected");
-
-      // Generate barcode in hidden SVG
-      JsBarcode("#hidden-barcode", regId, { format: "CODE128", displayValue: true });
-
-      const svg = document.getElementById("hidden-barcode");
-      const serializer = new XMLSerializer();
-      const source = serializer.serializeToString(svg);
-      const canvas = document.createElement("canvas");
-      const context = canvas.getContext("2d");
-      const img = new Image();
-
-      img.onload = function() {
-        canvas.width = img.width;
-        canvas.height = img.height;
-        context.drawImage(img, 0, 0);
-        const pngUrl = canvas.toDataURL("image/png");
-        const downloadLink = document.createElement("a");
-        downloadLink.href = pngUrl;
-        downloadLink.download = `Barcode_${regId}_${patientName.replace(/\s+/g, '_')}.png`;
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-      };
-      img.src = "data:image/svg+xml;base64," + btoa(source);
-    }
-
-    function updatePatient() {
-      if (selectedIndex === -1) return;
-      allPatients[selectedIndex] = {
-        ...allPatients[selectedIndex],
-        name: document.getElementById('patientName').value,
-        email: document.getElementById('patientEmail').value,
-        age: document.getElementById('age').value,
-        sex: document.getElementById('sex').value,
-        race: document.getElementById('race').value,
-        religion: document.getElementById('religion').value,
-        occupation: document.getElementById('occupation').value,
-        bloodGroup: document.getElementById('bloodGroup').value,
-        address: document.getElementById('address').value,
-        phone: document.getElementById('phone').value,
-        kinAddress: document.getElementById('kinAddress').value,
-        kinPhone: document.getElementById('kinPhone').value,
-        entryTime: document.getElementById('entryDateTime').value,
-        photo: document.getElementById('preview-img').src
-      };
-      localStorage.setItem('patients', JSON.stringify(allPatients));
-      alert("Information Updated!");
-      location.reload();
-    }
-
-    function deletePatient() {
-      if (selectedIndex === -1) return;
-      if (confirm("Are you sure you want to PERMANENTLY delete this patient record?")) {
-        allPatients.splice(selectedIndex, 1);
-        localStorage.setItem('patients', JSON.stringify(allPatients));
-        alert("Patient Record Deleted.");
-        location.reload();
-      }
     }
   </script>
 </body>
