@@ -22,13 +22,14 @@
     button { background-color: #6698fd; color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
     button:hover { background-color: #3376fe; border-radius: 12px; }
     
-    /* Camera/Preview Styles */
     #preview-img, #camera-stream { 
       display: block; max-width: 250px; margin: 10px auto; 
       border-radius: 8px; border: 1px solid #ccc; 
     }
-    #camera-container { text-align: center; display: none; }
+    #camera-container { text-align: center; display: none; background: #f0f0f0; padding: 10px; border-radius: 8px; }
     #barcode-container { text-align: center; margin-top: 20px; }
+    .btn-camera { background-color: #4CAF50; }
+    .btn-switch { background-color: #ff9800; }
   </style>
 </head>
 <body>
@@ -41,13 +42,13 @@
       <input type="text" id="regNumber" readonly style="background-color: #eee;">
 
       <label>Patient Name</label>
-      <input type="text" id="patientName" placeholder="Enter Full Name" required>
+      <input type="text" id="patientName" placeholder="Full Name" required>
 
       <label>Patient Email</label>
       <input type="email" id="patientEmail" placeholder="example@mail.com">
 
       <label>Age</label>
-      <input type="number" id="age" placeholder="Enter Age">
+      <input type="number" id="age" placeholder="Years">
 
       <label>Sex</label>
       <select id="sex">
@@ -57,11 +58,32 @@
         <option value="Others">Others</option>
       </select>
 
+      <label>Race</label>
+      <input type="text" id="race" placeholder="Race">
+
+      <label>Religion</label>
+      <input type="text" id="religion" placeholder="Religion">
+
+      <label>Occupation</label>
+      <input type="text" id="occupation" placeholder="Occupation">
+
+      <label>Blood Group & Rh</label>
+      <input type="text" id="bloodGroup" placeholder="e.g., O+">
+
       <label>Patient Address</label>
       <input type="text" id="address" placeholder="Home Address">
 
       <label>Patient Telephone</label>
       <input type="tel" id="phone" placeholder="Phone Number">
+
+      <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+      <h3 style="text-align: center;">Next of Kin Details</h3>
+
+      <label>Next of Kin Address</label>
+      <input type="text" id="kinAddress" placeholder="Kin Address">
+
+      <label>Next of Kin Telephone</label>
+      <input type="tel" id="kinPhone" placeholder="Kin Phone Number">
 
       <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
       <h3 style="text-align: center;">Patient Picture</h3>
@@ -71,10 +93,11 @@
       
       <p style="text-align:center;">- OR -</p>
       
-      <button type="button" onclick="startCamera()" style="background-color: #4CAF50;">Open Camera</button>
+      <button type="button" class="btn-camera" onclick="startCamera()">Open Camera</button>
       
       <div id="camera-container">
         <video id="camera-stream" autoplay playsinline></video>
+        <button type="button" class="btn-switch" onclick="switchCamera()">Switch Camera (Front/Back)</button>
         <button type="button" onclick="capturePhoto()">Capture Photo</button>
       </div>
 
@@ -98,59 +121,68 @@
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 
   <script>
-    const video = document.getElementById('camera-stream');
-    const canvas = document.getElementById('canvas');
-    const previewImg = document.getElementById('preview-img');
+    let currentStream = null;
+    let useBackCamera = false; // Toggle state
 
     window.onload = function() {
-      // 1. Generate Reg Number
       const regId = "AL-" + Math.floor(100000 + Math.random() * 900000);
       document.getElementById('regNumber').value = regId;
 
-      // 2. Set Current Date & Time
       const now = new Date();
-      const formattedDateTime = now.toISOString().slice(0, 16);
+      const formattedDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
       document.getElementById('entryDateTime').value = formattedDateTime;
 
-      // 3. Generate Barcode
       JsBarcode("#barcode", regId, { format: "CODE128", displayValue: true });
     };
 
-    // Upload Preview
     function previewImage(event) {
       const reader = new FileReader();
       reader.onload = function() {
-        previewImg.src = reader.result;
-        previewImg.style.display = 'block';
+        const output = document.getElementById('preview-img');
+        output.src = reader.result;
+        output.style.display = 'block';
       };
       if(event.target.files[0]) reader.readAsDataURL(event.target.files[0]);
     }
 
-    // Camera Logic
     async function startCamera() {
-      document.getElementById('camera-container').style.display = 'block';
+      if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+      }
+      
+      const constraints = {
+        video: { facingMode: useBackCamera ? "environment" : "user" }
+      };
+
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-        video.srcObject = stream;
+        currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+        const video = document.getElementById('camera-stream');
+        video.srcObject = currentStream;
+        document.getElementById('camera-container').style.display = 'block';
       } catch (err) {
-        alert("Could not access camera: " + err);
+        alert("Camera error: " + err);
       }
     }
 
+    function switchCamera() {
+      useBackCamera = !useBackCamera;
+      startCamera(); // Restart with new constraint
+    }
+
     function capturePhoto() {
-      const context = canvas.getContext('2d');
+      const video = document.getElementById('camera-stream');
+      const canvas = document.getElementById('canvas');
+      const previewImg = document.getElementById('preview-img');
+      
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      canvas.getContext('2d').drawImage(video, 0, 0);
       
-      const dataURL = canvas.toDataURL('image/png');
-      previewImg.src = dataURL;
+      previewImg.src = canvas.toDataURL('image/png');
       previewImg.style.display = 'block';
       
-      // Stop camera
-      const stream = video.srcObject;
-      const tracks = stream.getTracks();
-      tracks.forEach(track => track.stop());
+      // Stop Camera
+      currentStream.getTracks().forEach(track => track.stop());
       document.getElementById('camera-container').style.display = 'none';
     }
 
@@ -162,15 +194,25 @@
         regNumber: document.getElementById('regNumber').value,
         name: name,
         email: document.getElementById('patientEmail').value,
+        age: document.getElementById('age').value,
+        sex: document.getElementById('sex').value,
+        race: document.getElementById('race').value,
+        religion: document.getElementById('religion').value,
+        occupation: document.getElementById('occupation').value,
+        bloodGroup: document.getElementById('bloodGroup').value,
+        address: document.getElementById('address').value,
+        phone: document.getElementById('phone').value,
+        kinAddress: document.getElementById('kinAddress').value,
+        kinPhone: document.getElementById('kinPhone').value,
         entryTime: document.getElementById('entryDateTime').value,
-        photo: previewImg.src
+        photo: document.getElementById('preview-img').src
       };
 
       let patients = JSON.parse(localStorage.getItem('patients')) || [];
       patients.push(patientData);
       localStorage.setItem('patients', JSON.stringify(patients));
 
-      alert("Patient Saved!");
+      alert("Patient Record Saved!");
       location.href = 'main.php';
     }
   </script>
