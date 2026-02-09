@@ -61,18 +61,48 @@
       <form id="editForm">
         <label>Registration Number</label>
         <input type="text" id="regNumber" class="non-editable" readonly>
+
         <label>Patient Name</label>
         <input type="text" id="patientName" required>
+
         <label>Age</label>
         <input type="number" id="age">
+
         <label>Sex</label>
         <input list="sex-options" id="sex"><datalist id="sex-options"><option value="Male"><option value="Female"></datalist>
+
+        <label>Race</label>
+        <input list="race-options" id="race"><datalist id="race-options"><option value="Arabic"><option value="Kurdish"><option value="Other"></datalist>
+
+        <label>Religion</label>
+        <input list="religion-options" id="religion"><datalist id="religion-options"><option value="Muslim"><option value="Christian"><option value="Other"></datalist>
+
         <label>Occupation</label>
         <input type="text" id="occupation">
+
+        <label>Blood Group & Rh</label>
+        <input list="blood-options" id="bloodGroup">
+        <datalist id="blood-options"><option value="O+"><option value="O-"><option value="A+"><option value="A-"><option value="B+"><option value="B-"><option value="AB+"><option value="AB-"></datalist>
+
+        <label>Patient Address</label>
+        <input type="text" id="address">
+
         <label>Telephone</label>
         <input type="tel" id="phone">
+
+        <label>Patient Email</label>
+        <input type="email" id="patientEmail">
+
+        <hr>
+        <h3>Next of Kin Details</h3>
+        <label>Next of Kin Address</label>
+        <input type="text" id="kinAddress">
+        <label>Next of Kin Telephone</label>
+        <input type="tel" id="kinPhone">
+
         <label>Entry Date & Time</label>
         <input type="datetime-local" id="entryDateTime">
+
         <label>Patient Photo</label>
         <img id="preview-img" src="" alt="No Image">
         <input type="file" id="patientPic" accept="image/*" onchange="updatePreview(event)">
@@ -84,13 +114,12 @@
 
         <div class="btn-row">
           <button type="button" class="btn-delete" onclick="deletePatient()">Delete This Patient</button>
-          <button type="button" class="btn-download" onclick="downloadAsPDF()">Download PDF</button>
+          <button type="button" class="btn-download" onclick="downloadLabel()">Download PDF</button>
         </div>
       </form>
     </div>
 
     <canvas id="hidden-canvas" style="display:none;"></canvas>
-
     <button type="button" class="btn-main" onclick="location.href='mainpage.html'">Return to Main Page</button>
   </div>
 
@@ -127,65 +156,75 @@
       const p = allPatients[index];
       document.getElementById('resultsArea').style.display = 'none';
       document.getElementById('patient-form-section').style.display = 'block';
+      
+      // RESTORED ALL FIELDS
       document.getElementById('regNumber').value = p.regNumber;
       document.getElementById('patientName').value = p.name;
+      document.getElementById('age').value = p.age || '';
+      document.getElementById('sex').value = p.sex || '';
+      document.getElementById('race').value = p.race || '';
+      document.getElementById('religion').value = p.religion || '';
       document.getElementById('occupation').value = p.occupation || '';
+      document.getElementById('bloodGroup').value = p.bloodGroup || '';
+      document.getElementById('address').value = p.address || '';
       document.getElementById('phone').value = p.phone || '';
+      document.getElementById('patientEmail').value = p.email || '';
+      document.getElementById('kinAddress').value = p.kinAddress || '';
+      document.getElementById('kinPhone').value = p.kinPhone || '';
       document.getElementById('entryDateTime').value = p.entryTime || '';
       document.getElementById('preview-img').src = p.photo || '';
     }
 
-    async function downloadAsPDF() {
-      const { jsPDF } = window.jspdf;
+    function updatePatient() {
+      if (selectedIndex === -1) return;
+      allPatients[selectedIndex] = {
+        ...allPatients[selectedIndex],
+        name: document.getElementById('patientName').value,
+        age: document.getElementById('age').value,
+        sex: document.getElementById('sex').value,
+        race: document.getElementById('race').value,
+        religion: document.getElementById('religion').value,
+        occupation: document.getElementById('occupation').value,
+        bloodGroup: document.getElementById('bloodGroup').value,
+        address: document.getElementById('address').value,
+        phone: document.getElementById('phone').value,
+        email: document.getElementById('patientEmail').value,
+        kinAddress: document.getElementById('kinAddress').value,
+        kinPhone: document.getElementById('kinPhone').value,
+        entryTime: document.getElementById('entryDateTime').value,
+        photo: document.getElementById('preview-img').src
+      };
+      localStorage.setItem('patients', JSON.stringify(allPatients));
+      alert("Updated Successfully!");
+      location.reload();
+    }
+
+    function downloadLabel() {
       const regId = document.getElementById('regNumber').value;
-      const name = document.getElementById('patientName').value;
+      const patientName = document.getElementById('patientName').value;
+      if (!regId) return alert("Select a patient first");
+
+      const { jsPDF } = window.jspdf;
       const canvas = document.getElementById("hidden-canvas");
       const ctx = canvas.getContext("2d");
 
-      if (!regId) return alert("Select a patient first");
+      canvas.width = 500; canvas.height = 500;
+      ctx.fillStyle = "white"; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      canvas.width = 500;
-      canvas.height = 500;
-      ctx.fillStyle = "white";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // 1. Draw Barcode onto temp canvas
       const tempCanvas = document.createElement("canvas");
-      JsBarcode(tempCanvas, regId, {
-        format: "CODE128",
-        displayValue: true, // This keeps the number ONCE at the bottom of the barcode
-        fontSize: 20,
-        width: 2.5,
-        height: 100
-      });
+      JsBarcode(tempCanvas, regId, { format: "CODE128", displayValue: true, fontSize: 20, width: 2.5, height: 100 });
 
-      // Position barcode
       ctx.drawImage(tempCanvas, (canvas.width / 2) - (tempCanvas.width / 2), 220);
-
-      // 2. Draw Header & Name
-      ctx.fillStyle = "black";
-      ctx.textAlign = "center";
+      ctx.fillStyle = "black"; ctx.textAlign = "center";
       
       ctx.font = "bold 28px Times New Roman";
       ctx.fillText("Dr. Hayder Al-Kawaz Clinic", 250, 60);
-
-      ctx.beginPath();
-      ctx.lineWidth = 2;
-      ctx.moveTo(50, 85);
-      ctx.lineTo(450, 85);
-      ctx.stroke();
-
+      ctx.beginPath(); ctx.lineWidth = 2; ctx.moveTo(50, 85); ctx.lineTo(450, 85); ctx.stroke();
       ctx.font = "bold 24px Arial"; 
-      ctx.fillText("Patient Name: " + name, 250, 150);
+      ctx.fillText("Patient Name: " + patientName, 250, 150);
 
-      // 3. Export to PDF
       const imgData = canvas.toDataURL("image/png");
-      const doc = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: [100, 100]
-      });
-
+      const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: [100, 100] });
       doc.addImage(imgData, 'PNG', 0, 0, 100, 100);
       doc.save(`Label_${regId}.pdf`);
     }
@@ -203,14 +242,6 @@
             });
           }, 800); 
       }).catch(err => alert("Camera Error: " + err));
-    }
-
-    function updatePatient() {
-      if (selectedIndex === -1) return;
-      allPatients[selectedIndex] = { ...allPatients[selectedIndex], name: document.getElementById('patientName').value, occupation: document.getElementById('occupation').value, phone: document.getElementById('phone').value, entryTime: document.getElementById('entryDateTime').value, photo: document.getElementById('preview-img').src };
-      localStorage.setItem('patients', JSON.stringify(allPatients));
-      alert("Updated!");
-      location.reload();
     }
 
     function deletePatient() {
