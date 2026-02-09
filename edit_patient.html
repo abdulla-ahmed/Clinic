@@ -135,7 +135,6 @@
       document.getElementById('preview-img').src = p.photo || '';
     }
 
-    // UPDATED PDF DOWNLOADER: Logic fixed to prevent over-writing the canvas
     async function downloadAsPDF() {
       const { jsPDF } = window.jspdf;
       const regId = document.getElementById('regNumber').value;
@@ -145,62 +144,52 @@
 
       if (!regId) return alert("Select a patient first");
 
-      // 1. CLEAR CANVAS FIRST
       canvas.width = 500;
       canvas.height = 500;
       ctx.fillStyle = "white";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // 2. DRAW BARCODE FIRST (This prevents it from wiping the header later)
-      // We use a temporary canvas to generate the barcode then copy it over
+      // 1. Draw Barcode onto temp canvas
       const tempCanvas = document.createElement("canvas");
       JsBarcode(tempCanvas, regId, {
         format: "CODE128",
-        displayValue: true,
+        displayValue: true, // This keeps the number ONCE at the bottom of the barcode
         fontSize: 20,
         width: 2.5,
         height: 100
       });
 
-      // Position barcode in the center/bottom
+      // Position barcode
       ctx.drawImage(tempCanvas, (canvas.width / 2) - (tempCanvas.width / 2), 220);
 
-      // 3. NOW DRAW THE HEADER AND NAME ON TOP
+      // 2. Draw Header & Name
       ctx.fillStyle = "black";
       ctx.textAlign = "center";
       
-      // Clinic Header
       ctx.font = "bold 28px Times New Roman";
       ctx.fillText("Dr. Hayder Al-Kawaz Clinic", 250, 60);
 
-      // Divider Line
       ctx.beginPath();
       ctx.lineWidth = 2;
       ctx.moveTo(50, 85);
       ctx.lineTo(450, 85);
       ctx.stroke();
 
-      // Patient Name (Arabic Support)
       ctx.font = "bold 24px Arial"; 
-      ctx.fillText("Patient Name: " + name, 250, 140);
+      ctx.fillText("Patient Name: " + name, 250, 150);
 
-      // Registration Number Text (Optional extra)
-      ctx.font = "18px Arial";
-      ctx.fillText("Reg No: " + regId, 250, 180);
-
-      // 4. GENERATE PDF
+      // 3. Export to PDF
       const imgData = canvas.toDataURL("image/png");
       const doc = new jsPDF({
         orientation: "portrait",
         unit: "mm",
-        format: [100, 100] // Slightly larger for better clarity
+        format: [100, 100]
       });
 
       doc.addImage(imgData, 'PNG', 0, 0, 100, 100);
       doc.save(`Label_${regId}.pdf`);
     }
 
-    // (Remaining functions: startScanner, updatePatient, deletePatient, updatePreview stay the same)
     function startScanner() {
       const readerElem = document.getElementById('reader');
       readerElem.style.display = 'block';
