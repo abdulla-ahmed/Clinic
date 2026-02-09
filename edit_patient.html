@@ -95,7 +95,7 @@
 
         <div class="btn-row">
           <button type="button" class="btn-delete" onclick="deletePatient()">Delete This Patient</button>
-          <button type="button" class="btn-download" onclick="downloadAsPDF()">Download PDF</button>
+          <button type="button" class="btn-download" onclick="downloadAsPDF()">Download PDF (Arabic Fix)</button>
         </div>
       </form>
     </div>
@@ -109,7 +109,6 @@
     let allPatients = JSON.parse(localStorage.getItem('patients')) || [];
     let selectedIndex = -1;
 
-    // Standard Search and Load functions
     function searchPatient() {
       const textQuery = document.getElementById('searchInput').value.toLowerCase().trim();
       const dateQuery = document.getElementById('searchDate').value;
@@ -147,45 +146,51 @@
       document.getElementById('preview-img').src = p.photo || '';
     }
 
-    // NEW PDF DOWNLOAD LOGIC
+    // UPDATED FUNCTION: Fixes Arabic "Garbage" Text by using Canvas
     async function downloadAsPDF() {
       const { jsPDF } = window.jspdf;
       const regId = document.getElementById('regNumber').value;
       const name = document.getElementById('patientName').value;
       const canvas = document.getElementById("hidden-canvas");
+      const ctx = canvas.getContext("2d");
 
       if (!regId) return alert("Select a patient first");
 
-      // 1. Generate Barcode on hidden canvas
+      // 1. Prepare Canvas Size (High Resolution)
+      canvas.width = 400;
+      canvas.height = 400;
+      ctx.fillStyle = "white";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 2. Draw Arabic Text using the browser's native engine
+      ctx.fillStyle = "black";
+      ctx.textAlign = "center";
+      
+      ctx.font = "bold 24px Times New Roman";
+      ctx.fillText("Al-Kawaz Clinic", 200, 40);
+      
+      ctx.font = "20px Times New Roman";
+      ctx.fillText("Name: " + name, 200, 80);
+      ctx.fillText("ID: " + regId, 200, 110);
+
+      // 3. Draw Barcode onto a temporary element then copy to canvas
+      const tempSvg = document.createElement("div");
       JsBarcode(canvas, regId, {
         format: "CODE128",
         displayValue: true,
-        fontSize: 20
+        fontSize: 20,
+        marginTop: 150 // Position barcode below the text
       });
 
-      // 2. Convert Canvas to Image Data
+      // 4. Create PDF and add the Canvas Image
       const imgData = canvas.toDataURL("image/png");
-
-      // 3. Create PDF
       const doc = new jsPDF({
         orientation: "portrait",
         unit: "mm",
-        format: [80, 80] // Small square format perfect for clinic labels
+        format: [80, 80]
       });
 
-      doc.setFont("times", "bold");
-      doc.setFontSize(12);
-      doc.text("Al-Kawaz Clinic", 40, 10, { align: "center" });
-      
-      doc.setFontSize(10);
-      doc.setFont("times", "normal");
-      doc.text(`Patient: ${name}`, 10, 20);
-      doc.text(`ID: ${regId}`, 10, 25);
-
-      // Add Barcode Image
-      doc.addImage(imgData, 'PNG', 5, 30, 70, 30);
-
-      // 4. Save PDF
+      doc.addImage(imgData, 'PNG', 0, 0, 80, 80);
       doc.save(`Patient_${regId}.pdf`);
     }
 
