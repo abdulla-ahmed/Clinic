@@ -48,18 +48,19 @@
       <input type="number" id="age" placeholder="Years">
 
       <label>Sex</label>
-      <select id="sex">
-        <option value="">-- Select Sex --</option>
-        <option value="Male">Male</option>
-        <option value="Female">Female</option>
-        <option value="Others">Others</option>
-      </select>
+      <input list="sex-options" id="sex" placeholder="Select or type Sex">
+      <datalist id="sex-options">
+        <option value="Male">
+        <option value="Female">
+        <option value="Other">
+      </datalist>
 
       <label>Race</label>
       <input list="race-options" id="race" placeholder="Select or type Race">
       <datalist id="race-options">
         <option value="Arabic">
         <option value="Kurdish">
+        <option value="Other">
       </datalist>
 
       <label>Religion</label>
@@ -67,6 +68,7 @@
       <datalist id="religion-options">
         <option value="Muslim">
         <option value="Christian">
+        <option value="Other">
       </datalist>
 
       <label>Occupation</label>
