@@ -23,7 +23,6 @@
     button { background-color: #6698fd; color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
     button:hover { background-color: #3376fe; border-radius: 12px; }
     
-    /* Search Results Table */
     .results-section { display: none; margin-top: 20px; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9em; }
     th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
@@ -32,7 +31,10 @@
     tr:hover { background: #ddecff; cursor: pointer; }
 
     .search-section { background: #eef4ff; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #6698fd; }
-    #reader { width: 100%; max-width: 400px; margin: 10px auto; border-radius: 8px; overflow: hidden; }
+    
+    /* Camera Viewer */
+    #reader { width: 100%; max-width: 400px; margin: 10px auto; border-radius: 8px; overflow: hidden; border: 2px solid #6698fd; display: none;}
+    #scan-status { text-align: center; color: green; font-weight: bold; display: none; margin-bottom: 10px; }
     
     #patient-form-section { display: none; margin-top: 30px; border-top: 2px solid #6698fd; padding-top: 20px; }
     #preview-img { display: block; max-width: 150px; margin: 10px auto; border-radius: 8px; border: 1px solid #ccc; }
@@ -52,16 +54,16 @@
       <label style="text-align:center;">OR Search by Date</label>
       <input type="date" id="searchDate">
       
-      <button type="button" onclick="searchPatient()">Search Patient</button>
-      <button type="button" class="btn-camera" onclick="startScanner()">Scan Barcode with Camera</button>
-      
+      <div id="scan-status">✔ Barcode Scanned! Please wait...</div>
       <div id="reader"></div>
+
+      <button type="button" class="btn-camera" id="scanBtn" onclick="startScanner()">Open Barcode Scanner</button>
+      <button type="button" onclick="searchPatient()">Search Patient</button>
     </div>
 
     <div id="resultsArea" class="results-section">
-      <h3>Multiple Patients Found</h3>
-      <p style="text-align:center; font-style: italic;">Select the correct patient to edit:</p>
-      <table>
+      <h3>Search Results</h3>
+      <table id="resultsTable">
         <thead>
           <tr>
             <th>Name</th>
@@ -102,9 +104,7 @@
 
         <label>Blood Group & Rh</label>
         <input list="blood-options" id="bloodGroup">
-        <datalist id="blood-options">
-          <option value="O+"><option value="O-"><option value="A+"><option value="A-"><option value="B+"><option value="B-"><option value="AB+"><option value="AB-">
-        </datalist>
+        <datalist id="blood-options"><option value="O+"><option value="O-"><option value="A+"><option value="A-"><option value="B+"><option value="B-"><option value="AB+"><option value="AB-"></datalist>
 
         <label>Address</label>
         <input type="text" id="address">
@@ -115,11 +115,9 @@
         <label>Email</label>
         <input type="email" id="patientEmail">
 
-        <label>Next of Kin Address</label>
-        <input type="text" id="kinAddress">
-
-        <label>Next of Kin Telephone</label>
-        <input type="tel" id="kinPhone">
+        <label>Next of Kin Details</label>
+        <input type="text" id="kinAddress" placeholder="Kin Address">
+        <input type="tel" id="kinPhone" placeholder="Kin Phone">
 
         <label>Entry Date & Time</label>
         <input type="datetime-local" id="entryDateTime">
@@ -139,7 +137,6 @@
     let allPatients = JSON.parse(localStorage.getItem('patients')) || [];
     let selectedIndex = -1;
 
-    // 1. SEARCH FUNCTION
     function searchPatient() {
       const textQuery = document.getElementById('searchInput').value.toLowerCase().trim();
       const dateQuery = document.getElementById('searchDate').value;
@@ -152,7 +149,7 @@
       const matches = allPatients.map((p, index) => ({...p, originalIndex: index}))
         .filter(p => {
           const nameMatch = p.name.toLowerCase().includes(textQuery);
-          const regMatch = p.regNumber.toLowerCase().trim() === textQuery;
+          const regMatch = p.regNumber.toLowerCase().trim().includes(textQuery);
           const dateMatch = dateQuery ? p.entryTime.startsWith(dateQuery) : true;
           
           if (textQuery && dateQuery) return (nameMatch || regMatch) && dateMatch;
@@ -164,26 +161,22 @@
       if (matches.length > 0) {
         resultsArea.style.display = "block";
         matches.forEach(p => {
-          const row = `
-            <tr onclick="loadPatient(${p.originalIndex})">
+          const row = `<tr onclick="loadPatient(${p.originalIndex})">
               <td>${p.name}</td>
               <td>${p.regNumber}</td>
               <td>${p.entryTime.split('T')[0]}</td>
             </tr>`;
           resultsBody.innerHTML += row;
         });
-        resultsArea.scrollIntoView({ behavior: 'smooth' });
       } else {
-        alert("No patient found with these details.");
+        alert("No patient found. Please check your spelling or Registration Number.");
         resultsArea.style.display = "none";
       }
     }
 
-    // 2. LOAD PATIENT INTO FORM
     function loadPatient(index) {
       selectedIndex = index;
       const p = allPatients[index];
-      
       document.getElementById('resultsArea').style.display = 'none';
       document.getElementById('patient-form-section').style.display = 'block';
 
@@ -202,23 +195,33 @@
       document.getElementById('kinPhone').value = p.kinPhone || '';
       document.getElementById('entryDateTime').value = p.entryTime || '';
       document.getElementById('preview-img').src = p.photo || '';
-      
-      document.getElementById('patient-form-section').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // 3. SCANNER LOGIC
     function startScanner() {
+      const readerElem = document.getElementById('reader');
+      const statusElem = document.getElementById('scan-status');
+      readerElem.style.display = 'block';
+      
       const html5QrCode = new Html5Qrcode("reader");
+      
       html5QrCode.start(
         { facingMode: "environment" }, 
-        { fps: 15, qrbox: { width: 250, height: 150 } },
+        { fps: 20, qrbox: { width: 280, height: 180 } },
         (decodedText) => {
+          // 1. Success feedback
+          statusElem.style.display = 'block';
           document.getElementById('searchInput').value = decodedText.trim();
-          html5QrCode.stop().then(() => {
-            searchPatient();
-          });
+          
+          // 2. The Delay (1 second)
+          setTimeout(() => {
+            html5QrCode.stop().then(() => {
+              readerElem.style.display = 'none';
+              statusElem.style.display = 'none';
+              searchPatient(); // Trigger search
+            });
+          }, 1000); 
         }
-      ).catch(err => alert("Camera error: " + err));
+      ).catch(err => alert("Camera Error: " + err));
     }
 
     function updatePreview(event) {
@@ -227,10 +230,8 @@
       if(event.target.files[0]) reader.readAsDataURL(event.target.files[0]);
     }
 
-    // 4. SAVE CHANGES
     function updatePatient() {
       if (selectedIndex === -1) return;
-
       allPatients[selectedIndex] = {
         regNumber: document.getElementById('regNumber').value,
         name: document.getElementById('patientName').value,
@@ -248,7 +249,6 @@
         entryTime: document.getElementById('entryDateTime').value,
         photo: document.getElementById('preview-img').src
       };
-
       localStorage.setItem('patients', JSON.stringify(allPatients));
       alert("Information Updated Successfully!");
       location.reload();
