@@ -139,6 +139,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <script>
     let currentStream = null;
@@ -225,18 +226,19 @@
       patients.push(patientData);
       localStorage.setItem('patients', JSON.stringify(patients));
 
-      // Trigger the barcode download automatically
-      downloadBarcode(regNum, name);
+      // Trigger the PDF download
+      downloadBarcodePDF(regNum, name);
 
-      alert("Patient Record Saved and Barcode Downloaded!");
+      alert("Patient Record Saved and PDF Barcode Downloaded!");
       location.href = 'mainpage.html';
     }
 
-    // Helper function to convert the SVG barcode to a PNG and download it
-    function downloadBarcode(regId, patientName) {
+    function downloadBarcodePDF(regId, patientName) {
+      const { jsPDF } = window.jspdf;
       const svg = document.getElementById("barcode");
       const serializer = new XMLSerializer();
       const source = serializer.serializeToString(svg);
+      
       const canvas = document.createElement("canvas");
       const context = canvas.getContext("2d");
       const img = new Image();
@@ -245,13 +247,25 @@
         canvas.width = img.width;
         canvas.height = img.height;
         context.drawImage(img, 0, 0);
-        const pngUrl = canvas.toDataURL("image/png");
-        const downloadLink = document.createElement("a");
-        downloadLink.href = pngUrl;
-        downloadLink.download = `Barcode_${regId}_${patientName.replace(/\s+/g, '_')}.png`;
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
+        const imgData = canvas.toDataURL("image/png");
+
+        const doc = new jsPDF({
+          orientation: "portrait",
+          unit: "mm",
+          format: [80, 80]
+        });
+
+        doc.setFont("times", "bold");
+        doc.setFontSize(12);
+        doc.text("Al-Kawaz Clinic", 40, 10, { align: "center" });
+        
+        doc.setFontSize(10);
+        doc.setFont("times", "normal");
+        doc.text(`Patient: ${patientName}`, 10, 20);
+        doc.text(`ID: ${regId}`, 10, 25);
+
+        doc.addImage(imgData, 'PNG', 5, 30, 70, 30);
+        doc.save(`Barcode_${regId}.pdf`);
       };
 
       img.src = "data:image/svg+xml;base64," + btoa(source);
