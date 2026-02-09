@@ -135,7 +135,7 @@
       document.getElementById('preview-img').src = p.photo || '';
     }
 
-    // UPDATED PDF DOWNLOADER: Center Aligned + Arabic Fixed + Line Drawn
+    // UPDATED PDF DOWNLOADER: Logic fixed to prevent over-writing the canvas
     async function downloadAsPDF() {
       const { jsPDF } = window.jspdf;
       const regId = document.getElementById('regNumber').value;
@@ -145,52 +145,62 @@
 
       if (!regId) return alert("Select a patient first");
 
-      // 1. Prepare Canvas Size (400x400 for good quality)
-      canvas.width = 400;
-      canvas.height = 400;
+      // 1. CLEAR CANVAS FIRST
+      canvas.width = 500;
+      canvas.height = 500;
       ctx.fillStyle = "white";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // 2. Draw Clinic Header
-      ctx.fillStyle = "black";
-      ctx.textAlign = "center";
-      ctx.font = "bold 24px Times New Roman";
-      ctx.fillText("Dr. Hayder Al-Kawaz Clinic", 200, 40);
-
-      // 3. Draw the Line
-      ctx.beginPath();
-      ctx.moveTo(50, 55);
-      ctx.lineTo(350, 55);
-      ctx.stroke();
-
-      // 4. Draw Patient Name (This supports Arabic because the browser handles it)
-      ctx.font = "bold 20px Arial"; // Using Arial for better Arabic support
-      ctx.fillText("Patient: " + name, 200, 90);
-
-      // 5. Generate Barcode (Center it on Canvas)
-      JsBarcode(canvas, regId, {
+      // 2. DRAW BARCODE FIRST (This prevents it from wiping the header later)
+      // We use a temporary canvas to generate the barcode then copy it over
+      const tempCanvas = document.createElement("canvas");
+      JsBarcode(tempCanvas, regId, {
         format: "CODE128",
         displayValue: true,
-        fontSize: 22,
-        font: "Arial",
-        textPosition: "bottom",
-        width: 2,
-        height: 100,
-        marginTop: 130 // Moves barcode below text
+        fontSize: 20,
+        width: 2.5,
+        height: 100
       });
 
-      // 6. Create PDF and add the completed Canvas image
+      // Position barcode in the center/bottom
+      ctx.drawImage(tempCanvas, (canvas.width / 2) - (tempCanvas.width / 2), 220);
+
+      // 3. NOW DRAW THE HEADER AND NAME ON TOP
+      ctx.fillStyle = "black";
+      ctx.textAlign = "center";
+      
+      // Clinic Header
+      ctx.font = "bold 28px Times New Roman";
+      ctx.fillText("Dr. Hayder Al-Kawaz Clinic", 250, 60);
+
+      // Divider Line
+      ctx.beginPath();
+      ctx.lineWidth = 2;
+      ctx.moveTo(50, 85);
+      ctx.lineTo(450, 85);
+      ctx.stroke();
+
+      // Patient Name (Arabic Support)
+      ctx.font = "bold 24px Arial"; 
+      ctx.fillText("Patient Name: " + name, 250, 140);
+
+      // Registration Number Text (Optional extra)
+      ctx.font = "18px Arial";
+      ctx.fillText("Reg No: " + regId, 250, 180);
+
+      // 4. GENERATE PDF
       const imgData = canvas.toDataURL("image/png");
       const doc = new jsPDF({
         orientation: "portrait",
         unit: "mm",
-        format: [80, 80]
+        format: [100, 100] // Slightly larger for better clarity
       });
 
-      doc.addImage(imgData, 'PNG', 0, 0, 80, 80);
-      doc.save(`${regId}_Label.pdf`);
+      doc.addImage(imgData, 'PNG', 0, 0, 100, 100);
+      doc.save(`Label_${regId}.pdf`);
     }
 
+    // (Remaining functions: startScanner, updatePatient, deletePatient, updatePreview stay the same)
     function startScanner() {
       const readerElem = document.getElementById('reader');
       readerElem.style.display = 'block';
