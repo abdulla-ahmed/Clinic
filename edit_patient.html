@@ -12,32 +12,21 @@
     body { font-family: "Times New Roman", Times, serif; background-color: #f9f9f9; margin: 20px; font-size: 0.9em; }
     .container { max-width: 650px; margin: auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
     h1, h2, h3 { text-align: center; margin-bottom: 10px; }
-    
     label { font-weight: bold; margin-top: 10px; display: block; color: #333; }
-    
-    input, select, button { 
-      display: block; width: 100%; max-width: 450px; 
-      margin: 5px auto 12px auto; padding: 10px; 
-      border-radius: 8px; border: 1px solid #ccc; 
-      box-sizing: border-box; font-size: 0.95em; 
-    }
-    
+    input, select, button { display: block; width: 100%; max-width: 450px; margin: 5px auto 12px auto; padding: 10px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 0.95em; }
     .btn-row { display: flex; justify-content: center; gap: 10px; max-width: 450px; margin: auto; }
     .btn-row button { flex: 1; margin: 5px 0; }
-
     button { color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
     .btn-save { background-color: #6698fd; }
     .btn-cancel { background-color: #9e9e9e; }
     .btn-delete { background-color: #e53935; }
     .btn-download { background-color: #4CAF50; }
     .btn-main { background-color: #6c757d; width: 100%; max-width: 450px; margin: 10px auto; }
-
     .results-section { display: none; margin-top: 20px; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85em; }
     th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
     th { background-color: #6698fd; color: white; }
     tr:hover { background: #ddecff; cursor: pointer; }
-
     .search-section { background: #eef4ff; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #6698fd; }
     #reader { width: 100%; max-width: 400px; margin: 10px auto; border-radius: 8px; border: 2px solid #6698fd; display: none;}
     #patient-form-section { display: none; margin-top: 20px; border-top: 2px solid #6698fd; padding-top: 10px; }
@@ -95,7 +84,7 @@
 
         <div class="btn-row">
           <button type="button" class="btn-delete" onclick="deletePatient()">Delete This Patient</button>
-          <button type="button" class="btn-download" onclick="downloadAsPDF()">Download PDF (Arabic Fix)</button>
+          <button type="button" class="btn-download" onclick="downloadAsPDF()">Download PDF</button>
         </div>
       </form>
     </div>
@@ -146,7 +135,7 @@
       document.getElementById('preview-img').src = p.photo || '';
     }
 
-    // UPDATED FUNCTION: Fixes Arabic "Garbage" Text by using Canvas
+    // UPDATED PDF DOWNLOADER: Center Aligned + Arabic Fixed + Line Drawn
     async function downloadAsPDF() {
       const { jsPDF } = window.jspdf;
       const regId = document.getElementById('regNumber').value;
@@ -156,33 +145,41 @@
 
       if (!regId) return alert("Select a patient first");
 
-      // 1. Prepare Canvas Size (High Resolution)
+      // 1. Prepare Canvas Size (400x400 for good quality)
       canvas.width = 400;
       canvas.height = 400;
       ctx.fillStyle = "white";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // 2. Draw Arabic Text using the browser's native engine
+      // 2. Draw Clinic Header
       ctx.fillStyle = "black";
       ctx.textAlign = "center";
-      
       ctx.font = "bold 24px Times New Roman";
-      ctx.fillText("Al-Kawaz Clinic", 200, 40);
-      
-      ctx.font = "20px Times New Roman";
-      ctx.fillText("Name: " + name, 200, 80);
-      ctx.fillText("ID: " + regId, 200, 110);
+      ctx.fillText("Dr. Hayder Al-Kawaz Clinic", 200, 40);
 
-      // 3. Draw Barcode onto a temporary element then copy to canvas
-      const tempSvg = document.createElement("div");
+      // 3. Draw the Line
+      ctx.beginPath();
+      ctx.moveTo(50, 55);
+      ctx.lineTo(350, 55);
+      ctx.stroke();
+
+      // 4. Draw Patient Name (This supports Arabic because the browser handles it)
+      ctx.font = "bold 20px Arial"; // Using Arial for better Arabic support
+      ctx.fillText("Patient: " + name, 200, 90);
+
+      // 5. Generate Barcode (Center it on Canvas)
       JsBarcode(canvas, regId, {
         format: "CODE128",
         displayValue: true,
-        fontSize: 20,
-        marginTop: 150 // Position barcode below the text
+        fontSize: 22,
+        font: "Arial",
+        textPosition: "bottom",
+        width: 2,
+        height: 100,
+        marginTop: 130 // Moves barcode below text
       });
 
-      // 4. Create PDF and add the Canvas Image
+      // 6. Create PDF and add the completed Canvas image
       const imgData = canvas.toDataURL("image/png");
       const doc = new jsPDF({
         orientation: "portrait",
@@ -191,7 +188,7 @@
       });
 
       doc.addImage(imgData, 'PNG', 0, 0, 80, 80);
-      doc.save(`Patient_${regId}.pdf`);
+      doc.save(`${regId}_Label.pdf`);
     }
 
     function startScanner() {
