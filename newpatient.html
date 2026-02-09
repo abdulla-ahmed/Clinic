@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>New Patient - Al-Kawaz Clinic</title>
   <style>
+    /* ========== YOUR THEME PRESERVED ========== */
     body { font-family: "Times New Roman", Times, serif; background-color: #f9f9f9; margin: 20px; }
     .container { max-width: 600px; margin: auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
-    h1, h2 { text-align: center; }
+    h1 { text-align: center; color: #333; }
     label { font-weight: bold; margin-top: 15px; display: block; color: #333; }
     input, select, button { display: block; width: 100%; max-width: 450px; margin: 8px auto 18px auto; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; font-size: 1em; }
     button { background-color: #6698fd; color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
@@ -15,8 +16,6 @@
     #preview-img, #camera-stream { display: block; max-width: 250px; margin: 10px auto; border-radius: 8px; border: 1px solid #ccc; }
     #camera-container { text-align: center; display: none; background: #f0f0f0; padding: 10px; border-radius: 8px; }
     #barcode-container { text-align: center; margin-top: 20px; }
-    .btn-camera { background-color: #4CAF50; }
-    .btn-switch { background-color: #ff9800; }
   </style>
 </head>
 <body>
@@ -40,16 +39,12 @@
       <label>Occupation</label>
       <input type="text" id="occupation" placeholder="Occupation">
 
-      <label>Patient Telephone</label>
-      <input type="tel" id="phone" placeholder="Phone Number">
-
       <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
-      <h3 style="text-align: center;">Patient Picture</h3>
       
-      <button type="button" class="btn-camera" onclick="startCamera()">Open Camera</button>
+      <button type="button" style="background-color: #4CAF50;" onclick="startCamera()">Open Camera</button>
       
       <div id="camera-container">
-        <video id="camera-stream" autoplay playsinline></video>
+        <video id="camera-stream" autoplay playsinline style="width:100%; max-width:300px;"></video>
         <button type="button" onclick="capturePhoto()">Capture Photo</button>
       </div>
 
@@ -65,7 +60,7 @@
         <svg id="barcode-preview"></svg>
       </div>
 
-      <button type="button" onclick="savePatient()">Save Patient Information</button>
+      <button type="button" onclick="processRegistration()">Save & Download Label</button>
       <button type="button" style="background-color: #6c757d;" onclick="location.href='mainpage.html'">Back to Main Menu</button>
     </form>
   </div>
@@ -104,33 +99,38 @@
       document.getElementById('camera-container').style.display = 'none';
     }
 
-    function savePatient() {
+    // MAIN FUNCTION: Separated steps for reliability
+    function processRegistration() {
       const name = document.getElementById('patientName').value;
       const regNum = document.getElementById('regNumber').value;
-      if (!name) return alert("Patient Name is required!");
+      
+      if (!name) {
+        alert("Please enter Patient Name");
+        return;
+      }
 
+      // 1. Save to LocalStorage
       const patientData = {
         regNumber: regNum,
         name: name,
         entryTime: document.getElementById('entryDateTime').value,
         photo: document.getElementById('preview-img').src
       };
-
       let patients = JSON.parse(localStorage.getItem('patients')) || [];
       patients.push(patientData);
       localStorage.setItem('patients', JSON.stringify(patients));
 
-      // 1. Start PDF Download
-      downloadBarcodePDF(regNum, name);
+      // 2. Generate and Download PDF
+      downloadLabel(regNum, name);
 
-      // 2. Alert and WAIT before redirecting
-      alert("Saving record and downloading PDF...");
-      setTimeout(() => {
-        location.href = 'mainpage.html';
-      }, 1500); // 1.5 second delay ensures the download starts
+      // 3. Inform user and then redirect
+      alert("Registration Successful! Your PDF label is downloading. Click OK to return to menu.");
+      
+      // The redirect only happens AFTER they click OK on the alert
+      location.href = 'mainpage.html';
     }
 
-    function downloadBarcodePDF(regId, patientName) {
+    function downloadLabel(regId, patientName) {
       const { jsPDF } = window.jspdf;
       const canvas = document.getElementById("hidden-canvas");
       const ctx = canvas.getContext("2d");
@@ -140,6 +140,7 @@
       ctx.fillStyle = "white";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+      // Render Barcode
       const tempCanvas = document.createElement("canvas");
       JsBarcode(tempCanvas, regId, {
         format: "CODE128",
@@ -150,21 +151,19 @@
       });
 
       ctx.drawImage(tempCanvas, (canvas.width / 2) - (tempCanvas.width / 2), 220);
+      
+      // Text and Line
       ctx.fillStyle = "black";
       ctx.textAlign = "center";
-      
-      // Header
       ctx.font = "bold 28px Times New Roman";
       ctx.fillText("Dr. Hayder Al-Kawaz Clinic", 250, 60);
 
-      // Line
       ctx.beginPath();
       ctx.lineWidth = 2;
       ctx.moveTo(50, 85);
       ctx.lineTo(450, 85);
       ctx.stroke();
 
-      // Arabic Name
       ctx.font = "bold 24px Arial"; 
       ctx.fillText("Patient Name: " + patientName, 250, 150);
 
