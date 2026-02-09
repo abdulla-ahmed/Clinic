@@ -54,8 +54,11 @@
       <label>Telephone</label>
       <input type="tel" id="phone">
 
+      <label>Patient Email</label>
+      <input type="email" id="patientEmail">
+
       <hr>
-      <h3>Next of Kin</h3>
+      <h3>Next of Kin Details</h3>
       <label>Next of Kin Address</label>
       <input type="text" id="kinAddress">
       <label>Next of Kin Telephone</label>
@@ -66,7 +69,7 @@
       
       <div id="camera-container">
         <video id="camera-stream" autoplay playsinline style="width:100%; max-width:300px;"></video>
-        <button type="button" class="btn-switch" onclick="switchCamera()">Switch Camera (Selfie/Back)</button>
+        <button type="button" class="btn-switch" onclick="switchCamera()">Switch Camera</button>
         <button type="button" onclick="capturePhoto()">Capture Photo</button>
       </div>
 
@@ -78,12 +81,12 @@
       <label>Entry Date & Time</label>
       <input type="datetime-local" id="entryDateTime">
 
-      <div id="barcode-container" style="text-align: center; margin-top: 10px;">
+      <div id="barcode-container" style="text-align: center;">
         <svg id="barcode-preview"></svg>
       </div>
 
-      <button type="button" id="saveBtn" onclick="processRegistration()">Save & Download Label</button>
-      <button type="button" style="background-color: #6c757d;" onclick="location.href='mainpage.html'">Cancel</button>
+      <button type="button" id="saveBtn" onclick="processRegistration()">Save Patient Information</button>
+      <button type="button" style="background-color: #6c757d;" onclick="location.href='mainpage.html'">Back to Main Menu</button>
     </form>
   </div>
 
@@ -92,7 +95,7 @@
 
   <script>
     let currentStream = null;
-    let useBackCamera = true; // Default to back camera for doctors
+    let useBackCamera = true;
 
     window.onload = function() {
       const regId = "AL-" + Math.floor(100000 + Math.random() * 900000);
@@ -106,18 +109,23 @@
     async function startCamera() {
       if (currentStream) {
         currentStream.getTracks().forEach(track => track.stop());
+        currentStream = null;
       }
+      const video = document.getElementById('camera-stream');
+      video.srcObject = null;
+
       const constraints = { video: { facingMode: useBackCamera ? "environment" : "user" } };
       try {
         currentStream = await navigator.mediaDevices.getUserMedia(constraints);
-        document.getElementById('camera-stream').srcObject = currentStream;
+        video.srcObject = currentStream;
         document.getElementById('camera-container').style.display = 'block';
+        video.onloadedmetadata = () => video.play();
       } catch (err) { alert("Camera error: " + err); }
     }
 
     function switchCamera() {
       useBackCamera = !useBackCamera;
-      startCamera();
+      setTimeout(() => startCamera(), 100);
     }
 
     function capturePhoto() {
@@ -137,7 +145,7 @@
       const regNum = document.getElementById('regNumber').value;
       if (!name) return alert("Patient Name is required!");
 
-      saveBtn.innerText = "Saving...";
+      saveBtn.innerText = "Processing...";
       saveBtn.disabled = true;
 
       const patientData = {
@@ -151,6 +159,7 @@
         bloodGroup: document.getElementById('bloodGroup').value,
         address: document.getElementById('address').value,
         phone: document.getElementById('phone').value,
+        email: document.getElementById('patientEmail').value,
         kinAddress: document.getElementById('kinAddress').value,
         kinPhone: document.getElementById('kinPhone').value,
         entryTime: document.getElementById('entryDateTime').value,
@@ -163,9 +172,7 @@
 
       downloadLabel(regNum, name);
 
-      // 2 second delay to ensure the browser saves the PDF
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
       alert("Registration Saved and Label Downloaded!");
       location.href = 'mainpage.html';
     }
