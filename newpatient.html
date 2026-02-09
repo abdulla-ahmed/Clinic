@@ -14,7 +14,8 @@
     button:hover { background-color: #3376fe; border-radius: 12px; }
     #preview-img, #camera-stream { display: block; max-width: 250px; margin: 10px auto; border-radius: 8px; border: 1px solid #ccc; }
     #camera-container { text-align: center; display: none; background: #f0f0f0; padding: 10px; border-radius: 8px; }
-    #barcode-container { text-align: center; margin-top: 20px; }
+    .btn-camera { background-color: #4CAF50; }
+    .btn-switch { background-color: #ff9800; }
   </style>
 </head>
 <body>
@@ -42,11 +43,10 @@
       <input list="religion-options" id="religion"><datalist id="religion-options"><option value="Muslim"><option value="Christian"></datalist>
 
       <label>Occupation</label>
-      <input type="text" id="occupation" placeholder="Occupation">
+      <input type="text" id="occupation">
 
       <label>Blood Group</label>
-      <input list="blood-options" id="bloodGroup">
-      <datalist id="blood-options"><option value="O+"><option value="O-"><option value="A+"><option value="A-"><option value="B+"><option value="B-"><option value="AB+"><option value="AB-"></datalist>
+      <input list="blood-options" id="bloodGroup"><datalist id="blood-options"><option value="O+"><option value="O-"><option value="A+"><option value="A-"><option value="B+"><option value="B-"><option value="AB+"><option value="AB-"></datalist>
 
       <label>Patient Address</label>
       <input type="text" id="address">
@@ -62,11 +62,14 @@
       <input type="tel" id="kinPhone">
 
       <hr>
-      <button type="button" style="background-color: #4CAF50;" onclick="startCamera()">Open Camera</button>
+      <button type="button" class="btn-camera" onclick="startCamera()">Open Camera</button>
+      
       <div id="camera-container">
         <video id="camera-stream" autoplay playsinline style="width:100%; max-width:300px;"></video>
+        <button type="button" class="btn-switch" onclick="switchCamera()">Switch Camera (Selfie/Back)</button>
         <button type="button" onclick="capturePhoto()">Capture Photo</button>
       </div>
+
       <img id="preview-img" src="#" alt="Preview" style="display:none;">
       
       <canvas id="hidden-canvas" style="display:none;"></canvas>
@@ -75,11 +78,11 @@
       <label>Entry Date & Time</label>
       <input type="datetime-local" id="entryDateTime">
 
-      <div id="barcode-container">
+      <div id="barcode-container" style="text-align: center; margin-top: 10px;">
         <svg id="barcode-preview"></svg>
       </div>
 
-      <button type="button" id="saveBtn" onclick="processRegistration()">Save & Download PDF</button>
+      <button type="button" id="saveBtn" onclick="processRegistration()">Save & Download Label</button>
       <button type="button" style="background-color: #6c757d;" onclick="location.href='mainpage.html'">Cancel</button>
     </form>
   </div>
@@ -89,6 +92,7 @@
 
   <script>
     let currentStream = null;
+    let useBackCamera = true; // Default to back camera for doctors
 
     window.onload = function() {
       const regId = "AL-" + Math.floor(100000 + Math.random() * 900000);
@@ -100,11 +104,20 @@
     };
 
     async function startCamera() {
+      if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+      }
+      const constraints = { video: { facingMode: useBackCamera ? "environment" : "user" } };
       try {
-        currentStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        currentStream = await navigator.mediaDevices.getUserMedia(constraints);
         document.getElementById('camera-stream').srcObject = currentStream;
         document.getElementById('camera-container').style.display = 'block';
       } catch (err) { alert("Camera error: " + err); }
+    }
+
+    function switchCamera() {
+      useBackCamera = !useBackCamera;
+      startCamera();
     }
 
     function capturePhoto() {
@@ -122,14 +135,11 @@
       const saveBtn = document.getElementById('saveBtn');
       const name = document.getElementById('patientName').value;
       const regNum = document.getElementById('regNumber').value;
-      
       if (!name) return alert("Patient Name is required!");
 
-      // 1. Change button status so user doesn't click twice
-      saveBtn.innerText = "Processing...";
+      saveBtn.innerText = "Saving...";
       saveBtn.disabled = true;
 
-      // 2. Save Data
       const patientData = {
         regNumber: regNum,
         name: name,
@@ -151,13 +161,11 @@
       patients.push(patientData);
       localStorage.setItem('patients', JSON.stringify(patients));
 
-      // 3. Trigger Download
       downloadLabel(regNum, name);
 
-      // 4. Force a 2-second delay to ensure browser handoff
+      // 2 second delay to ensure the browser saves the PDF
       await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // 5. Alert and Redirect
+      
       alert("Registration Saved and Label Downloaded!");
       location.href = 'mainpage.html';
     }
