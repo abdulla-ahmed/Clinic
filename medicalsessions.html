@@ -10,12 +10,22 @@
     body { font-family: "Times New Roman", Times, serif; background: #fdfdfd; margin: 20px; color: var(--dark); }
     .container { max-width: 850px; margin: auto; background: white; padding: 30px; border: 1px solid var(--border); border-radius: 8px; }
     
-    /* Search Section */
-    .search-section { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px; border: 1px solid var(--border); }
-    input, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 1.05em; }
+    /* Search Section (Identical to Edit Patient) */
+    .search-section { background: #eef4ff; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--primary); }
+    h3 { text-align: center; margin-top: 0; }
+    input, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 0.95em; }
+    #reader { width: 100%; max-width: 400px; margin: 10px auto; border-radius: 8px; border: 2px solid var(--primary); display: none;}
     
-    button { padding: 12px; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; transition: 0.2s; }
-    .btn-search { background: var(--primary); color: white; width: 100%; }
+    button { display: block; width: 100%; max-width: 450px; margin: 10px auto; padding: 10px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; color: white; transition: 0.2s; }
+    .btn-search { background-color: var(--primary); }
+    .btn-scan { background-color: #4CAF50; }
+
+    /* Results Table */
+    .results-section { display: none; margin-top: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85em; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: var(--primary); color: white; }
+    tr:hover { background: #ddecff; cursor: pointer; }
 
     /* Patient Profile Card */
     .patient-profile-column { display: flex; flex-direction: column; align-items: center; padding: 20px; background: #f0f4ff; border-radius: 12px; margin-bottom: 30px; border: 1px solid #ddecff; }
@@ -27,22 +37,22 @@
 
     /* Grouped Shaded Boxes */
     .group-box { padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(0,0,0,0.05); }
-    .history-box { background-color: #fef9e7; border-left: 6px solid #f1c40f; } /* Soft Yellow */
-    .vitals-box { background-color: #e8f8f5; border-left: 6px solid #1abc9c; } /* Soft Mint */
-    .exam-box { background-color: #f4f4f9; border-left: 6px solid #5d6d7e; }   /* Soft Grey/Blue */
-    .inv-box { background-color: #fdf2f2; border-left: 6px solid #e74c3c; }    /* Soft Rose */
+    .history-box { background-color: #fef9e7; border-left: 6px solid #f1c40f; }
+    .vitals-box { background-color: #e8f8f5; border-left: 6px solid #1abc9c; }
+    .exam-box { background-color: #f4f4f9; border-left: 6px solid #5d6d7e; }
+    .inv-box { background-color: #fdf2f2; border-left: 6px solid #e74c3c; }
 
     .section-title { font-size: 1.2em; font-weight: bold; margin-bottom: 15px; color: var(--dark); text-transform: uppercase; }
     
     /* Vitals Styling */
     .vitals-grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-top: 10px; }
     .vital-input-card { display: flex; align-items: center; background: white; border: 1px solid #ccc; padding: 8px 15px; border-radius: 8px; }
-    .vital-input-card input { border: none; width: 60px; margin: 0; padding: 0; text-align: center; font-weight: bold; font-size: 1.1em; }
+    .vital-input-card input { border: none; width: 60px; margin: 0; padding: 0; text-align: center; font-weight: bold; font-size: 1.1em; outline: none; }
     .vital-input-card span { font-size: 0.9em; color: #7f8c8d; margin-left: 8px; }
 
     .footer-btns { display: flex; gap: 15px; margin-top: 30px; }
-    .btn-save { background: #2c3e50; color: white; flex: 2; font-size: 1.1em; }
-    .btn-cancel { background: #95a5a6; color: white; flex: 1; }
+    .btn-save { background: #2c3e50; }
+    .btn-cancel { background: #95a5a6; }
 
     #session-form { display: none; }
   </style>
@@ -50,21 +60,29 @@
 <body>
 
 <div class="container">
-  <h1 style="text-align:center;">Clinical Management</h1>
+  <h1 style="text-align:center;">Medical Session</h1>
 
   <div class="search-section" id="search-block">
-    <input type="text" id="searchInput" placeholder="Search Patient Name or Registration Number...">
-    <button class="btn-search" onclick="searchPatient()">Find Patient</button>
-    <div id="resultsArea" style="margin-top:10px;"></div>
+    <h3>Find Patient</h3>
+    <input type="text" id="searchInput" placeholder="Search Name or Reg No. or Barcode">
+    <div id="reader"></div>
+    <button type="button" class="btn-scan" onclick="startScanner()">Open Barcode Scanner</button>
+    <button type="button" class="btn-search" onclick="searchPatient()">Search Patient</button>
+    
+    <div id="resultsArea" class="results-section">
+      <table>
+        <thead><tr><th>Name</th><th>Reg No</th><th>Visit Date</th></tr></thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+    </div>
   </div>
 
   <div id="session-form">
     <h2 id="visitDisplay" style="text-align:center; color: var(--primary);"></h2>
 
     <div class="patient-profile-column">
-      <img id="p_photo" class="patient-photo" src="" alt="Patient">
-      <div class="info-list" id="p_info_details">
-        </div>
+      <img id="p_photo" class="patient-photo" src="" alt="No Image">
+      <div class="info-list" id="p_info_details"></div>
     </div>
 
     <div class="group-box history-box">
@@ -96,11 +114,12 @@
 
     <div class="group-box exam-box">
       <div class="section-title">Physical Examination</div>
-      <textarea id="exam_details" rows="10" placeholder="Describe findings..."></textarea>
+      <textarea id="exam_details" rows="10"></textarea>
     </div>
 
     <div class="group-box inv-box">
-      <div class="section-title">Investigations & Notes</div>
+      <div class="section-title">Investigations</div>
+      <label>Important Notes</label>
       <textarea id="inv_notes" rows="6"></textarea>
       <button type="button" class="btn-search" style="background:#e74c3c;" onclick="document.getElementById('fileInput').click()">Upload Files</button>
       <input type="file" id="fileInput" hidden multiple accept="image/*,application/pdf" onchange="handleFiles(event)">
@@ -108,7 +127,7 @@
     </div>
 
     <div class="footer-btns">
-      <button class="btn-save" onclick="saveSession()">Save & Generate Preview</button>
+      <button class="btn-save" onclick="saveSession()">Save & Preview</button>
       <button class="btn-cancel" onclick="location.href='mainpage.html'">Cancel</button>
     </div>
   </div>
@@ -120,13 +139,43 @@
   let selectedPatient = null;
   let attachments = [];
 
+  // EXACT SEARCH FROM EDIT_PATIENT.HTML
   function searchPatient() {
-    const query = document.getElementById('searchInput').value.toLowerCase();
-    const matches = allPatients.filter(p => p.name.toLowerCase().includes(query) || p.regNumber.includes(query));
-    document.getElementById('resultsArea').innerHTML = matches.map(p => `
-      <div onclick='loadForm(${JSON.stringify(p)})' style="padding:10px; border-bottom:1px solid #eee; cursor:pointer;">
-        ${p.name} (${p.regNumber})
-      </div>`).join('');
+    const textQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+    const resultsBody = document.getElementById('resultsBody');
+    const resultsArea = document.getElementById('resultsArea');
+    resultsBody.innerHTML = ""; 
+    document.getElementById('session-form').style.display = 'none';
+
+    if (!textQuery) return;
+
+    const matches = allPatients.filter(p => 
+      p.name.toLowerCase().includes(textQuery) || 
+      p.regNumber.toLowerCase().includes(textQuery)
+    );
+
+    if (matches.length > 0) {
+      resultsArea.style.display = "block";
+      matches.forEach(p => {
+        resultsBody.innerHTML += `<tr onclick='loadForm(${JSON.stringify(p)})'><td>${p.name}</td><td>${p.regNumber}</td><td>${(p.entryTime || '').split('T')[0]}</td></tr>`;
+      });
+    } else { alert("Not found."); }
+  }
+
+  // EXACT SCANNER FROM EDIT_PATIENT.HTML
+  function startScanner() {
+    const readerElem = document.getElementById('reader');
+    readerElem.style.display = 'block';
+    const html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, (decodedText) => {
+        document.getElementById('searchInput').value = decodedText.trim();
+        setTimeout(() => {
+          html5QrCode.stop().then(() => {
+            readerElem.style.display = 'none';
+            searchPatient();
+          });
+        }, 800); 
+    }).catch(err => alert("Camera Error: " + err));
   }
 
   function loadForm(p) {
@@ -136,26 +185,31 @@
 
     const visitNo = allSessions.filter(s => s.regNumber === p.regNumber).length + 1;
     document.getElementById('visitDisplay').innerText = "VISIT NO: " + visitNo;
-    selectedPatient.currentVisit = visitNo;
+    selectedPatient.currentVisitNo = visitNo;
 
-    // Build the Info List - Skipping empty values
+    document.getElementById('p_photo').src = p.photo || '';
     const infoContainer = document.getElementById('p_info_details');
     infoContainer.innerHTML = "";
-    document.getElementById('p_photo').src = p.photo || '';
 
+    // Comprehensive list of fields from registration
     const fields = [
       { label: "Patient Name", val: p.name },
       { label: "Registration No", val: p.regNumber },
       { label: "Age", val: p.age },
       { label: "Sex", val: p.sex },
-      { label: "Blood Group", val: p.bloodGroup },
       { label: "Race", val: p.race },
       { label: "Religion", val: p.religion },
-      { label: "Phone", val: p.phone }
+      { label: "Occupation", val: p.occupation },
+      { label: "Blood Group", val: p.bloodGroup },
+      { label: "Address", val: p.address },
+      { label: "Telephone", val: p.phone },
+      { label: "Email", val: p.email },
+      { label: "Kin Address", val: p.kinAddress },
+      { label: "Kin Phone", val: p.kinPhone }
     ];
 
     fields.forEach(f => {
-      if (f.val && f.val.trim() !== "") {
+      if (f.val && f.val.toString().trim() !== "") {
         infoContainer.innerHTML += `
           <div class="info-row">
             <span class="info-label">${f.label}:</span>
@@ -172,7 +226,8 @@
       reader.onload = (ev) => {
         attachments.push(ev.target.result);
         const img = document.createElement('img');
-        img.src = ev.target.result; img.style.width = "60px";
+        img.src = file.type === 'application/pdf' ? 'https://cdn-icons-png.flaticon.com/512/337/337946.png' : ev.target.result;
+        img.style.width = "60px"; img.style.borderRadius = "4px";
         document.getElementById('fileList').appendChild(img);
       };
       reader.readAsDataURL(file);
@@ -183,7 +238,7 @@
     const sessionData = {
       regNumber: selectedPatient.regNumber,
       patientName: selectedPatient.name,
-      visitNo: selectedPatient.currentVisit,
+      visitNo: selectedPatient.currentVisitNo,
       date: new Date().toLocaleString(),
       vitals: {
         temp: document.getElementById('v_temp').value,
@@ -194,9 +249,17 @@
       history: {
           chief: document.getElementById('h_chief').value,
           illness: document.getElementById('h_illness').value,
-          ros: document.getElementById('h_ros').value
-          // ... add others similarly
+          ros: document.getElementById('h_ros').value,
+          pastMed: document.getElementById('h_past_med').value,
+          pastSurg: document.getElementById('h_past_surg').value,
+          drugs: document.getElementById('h_drugs').value,
+          allergies: document.getElementById('h_allergies').value,
+          blood: document.getElementById('h_blood').value,
+          family: document.getElementById('h_family').value,
+          social: document.getElementById('h_social').value
       },
+      exam: document.getElementById('exam_details').value,
+      notes: document.getElementById('inv_notes').value,
       files: attachments
     };
 
