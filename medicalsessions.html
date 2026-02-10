@@ -15,8 +15,8 @@
     h3 { text-align: center; margin-top: 0; }
     input, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 0.95em; }
     
-    /* Date Search Label Styling */
-    .date-label { display: block; font-weight: bold; margin-top: 10px; color: #555; font-size: 0.9em; }
+    /* Search by Date Label */
+    .date-label { font-weight: bold; display: block; margin-top: 10px; color: #555; font-size: 0.9em; }
 
     #reader { width: 100%; max-width: 400px; margin: 10px auto; border-radius: 8px; border: 2px solid var(--primary); display: none;}
     
@@ -24,7 +24,7 @@
     .btn-search { background-color: var(--primary); }
     .btn-scan { background-color: #4CAF50; }
 
-    /* Results Table - Fixed to 11px to match edit_patient and stay on one line */
+    /* Results Table - 11px font to keep data on one line */
     .results-section { display: none; margin-top: 20px; width: 100%; overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; table-layout: fixed; }
     th, td { border: 1px solid #ddd; padding: 8px; text-align: left; white-space: nowrap; overflow: hidden; }
@@ -70,7 +70,7 @@
     <h3>Find Patient</h3>
     <input type="text" id="searchInput" placeholder="Search Name or Reg No. or Barcode">
     
-    <label class="date-label">Search by Registration Date:</label>
+    <label class="date-label">Search by Date:</label>
     <input type="date" id="searchDate">
     
     <div id="reader"></div>
@@ -80,11 +80,11 @@
     <div id="resultsArea" class="results-section">
       <table>
         <thead>
-          <tr>
-            <th style="width: 40%;">Name</th>
-            <th style="width: 30%;">Reg No</th>
-            <th style="width: 30%;">Reg Date</th>
-          </tr>
+            <tr>
+                <th style="width: 40%;">Name</th>
+                <th style="width: 30%;">Reg No</th>
+                <th style="width: 30%;">Visit Date</th>
+            </tr>
         </thead>
         <tbody id="resultsBody"></tbody>
       </table>
@@ -168,7 +168,6 @@
         const regMatch = p.regNumber.toLowerCase().includes(textQuery);
         const dateMatch = dateQuery ? (p.entryTime && p.entryTime.startsWith(dateQuery)) : true;
         
-        // Match logic: If text provided, name/reg must match. If date provided, date must match.
         if(textQuery && dateQuery) return (nameMatch || regMatch) && dateMatch;
         if(textQuery) return (nameMatch || regMatch);
         if(dateQuery) return dateMatch;
