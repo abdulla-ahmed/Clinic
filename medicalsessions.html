@@ -16,38 +16,41 @@
     input, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 1em; }
     .search-date-label { display: block; margin-top: 10px; font-weight: bold; color: var(--dark); font-size: 0.9em; }
 
-    /* Patient Info Section - Small Font Only Here */
+    #reader { width: 100%; max-width: 400px; margin: 10px auto; border-radius: 8px; border: 2px solid var(--primary); display: none;}
+    
+    button { display: block; width: 100%; max-width: 450px; margin: 10px auto; padding: 12px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; color: white; transition: 0.2s; }
+    .btn-search { background-color: var(--primary); }
+    .btn-scan { background-color: #4CAF50; }
+
+    /* Results Table */
+    .results-section { display: none; margin-top: 20px; width: 100%; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; table-layout: fixed; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; white-space: nowrap; overflow: hidden; }
+    th { background-color: var(--primary); color: white; }
+    tr:hover { background: #ddecff; cursor: pointer; }
+
+    /* Patient Profile Card - SMALL FONT ONLY HERE */
     .patient-profile-column { display: flex; flex-direction: column; align-items: center; padding: 15px; background: #f0f4ff; border-radius: 12px; margin-bottom: 30px; border: 1px solid #ddecff; }
-    .patient-photo { width: 130px; height: 150px; object-fit: cover; border: 3px solid white; border-radius: 8px; margin-bottom: 15px; }
-    .info-list { width: 100%; max-width: 650px; font-size: 0.82em; } /* Smaller font for info only */
-    .info-row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid rgba(102, 152, 253, 0.15); width: 100%; }
+    .patient-photo { width: 130px; height: 150px; object-fit: cover; border: 4px solid white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-bottom: 15px; }
+    .info-list { width: 100%; max-width: 600px; font-size: 0.82em; } 
+    .info-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(102, 152, 253, 0.2); width: 100%; }
     .info-label { font-weight: bold; color: #555; }
     .info-value { color: #000; text-align: right; }
 
-    /* Vitals Styling - Units outside, clean boxes */
-    .vitals-grid { display: flex; flex-wrap: wrap; gap: 25px; align-items: center; }
+    /* Vital Signs Units Outside */
+    .vitals-grid { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; }
     .vital-item { display: flex; align-items: center; gap: 8px; }
     .vital-item label { font-weight: bold; width: 45px; }
-    .vital-input-wrapper { display: flex; align-items: center; gap: 5px; }
-    .v-box { width: 60px; height: 35px; border: 1px solid #ccc; border-radius: 6px; text-align: center; font-weight: normal; font-size: 1em; }
+    .v-box { width: 60px; height: 35px; border: 1px solid #ccc; border-radius: 6px; text-align: center; font-size: 1em; font-weight: normal; }
+    .bp-box { width: 55px; } 
     .unit-label { font-size: 0.9em; color: #666; font-weight: normal; }
 
-    /* BP Specific Styling */
-    .bp-box { width: 50px; } /* Slightly wider for BP numbers */
-    .slash { font-size: 1.2em; color: #999; }
-
-    /* Layout Boxes */
+    /* Boxes */
     .group-box { padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(0,0,0,0.05); }
     .history-box { background-color: #fef9e7; border-left: 6px solid #f1c40f; }
     .vitals-box { background-color: #e8f8f5; border-left: 6px solid #1abc9c; }
-    .exam-box { background-color: #f4f4f9; border-left: 6px solid #5d6d7e; }
     .section-title { font-size: 1.1em; font-weight: bold; margin-bottom: 15px; text-transform: uppercase; }
 
-    /* Buttons */
-    button { display: block; width: 100%; max-width: 450px; margin: 10px auto; padding: 12px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; color: white; }
-    .btn-search { background-color: var(--primary); }
-    .footer-btns { display: flex; gap: 15px; margin-top: 30px; }
-    
     #session-form { display: none; }
   </style>
 </head>
@@ -59,13 +62,19 @@
   <div class="search-section" id="search-block">
     <h3>Find Patient</h3>
     <input type="text" id="searchInput" placeholder="Search Name, Reg. No., or Barcode">
+    
     <label class="search-date-label">Search by Date:</label>
     <input type="date" id="searchDate">
+    
+    <div id="reader"></div>
+    <button type="button" class="btn-scan" onclick="startScanner()">Open Barcode Scanner</button>
     <button type="button" class="btn-search" onclick="searchPatient()">Search Patient</button>
-    <div id="resultsArea" style="display:none; margin-top:15px;">
-        <table style="width:100%; border-collapse: collapse; font-size:0.9em;">
-            <tbody id="resultsBody"></tbody>
-        </table>
+    
+    <div id="resultsArea" class="results-section">
+      <table>
+        <thead><tr><th>Name</th><th>Reg. No.</th><th>Visit Date</th></tr></thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
     </div>
   </div>
 
@@ -80,32 +89,15 @@
     <div class="group-box vitals-box">
       <div class="section-title">Vital Signs</div>
       <div class="vitals-grid">
-        <div class="vital-item">
-            <label>Temp</label>
-            <div class="vital-input-wrapper">
-                <input type="number" id="v_temp" class="v-box"> <span class="unit-label">C°</span>
-            </div>
-        </div>
-        <div class="vital-item">
-            <label>HR</label>
-            <div class="vital-input-wrapper">
-                <input type="number" id="v_hr" class="v-box"> <span class="unit-label">bpm</span>
-            </div>
-        </div>
-        <div class="vital-item">
-            <label>RR</label>
-            <div class="vital-input-wrapper">
-                <input type="number" id="v_rr" class="v-box"> <span class="unit-label">bpm</span>
-            </div>
-        </div>
+        <div class="vital-item"><label>Temp</label><input type="number" id="v_temp" class="v-box"> <span class="unit-label">C°</span></div>
+        <div class="vital-item"><label>HR</label><input type="number" id="v_hr" class="v-box"> <span class="unit-label">bpm</span></div>
+        <div class="vital-item"><label>RR</label><input type="number" id="v_rr" class="v-box"> <span class="unit-label">bpm</span></div>
         <div class="vital-item">
             <label>BP</label>
-            <div class="vital-input-wrapper">
-                <input type="number" id="v_bp_s" class="v-box bp-box" placeholder="Sys"> 
-                <span class="slash">/</span> 
-                <input type="number" id="v_bp_d" class="v-box bp-box" placeholder="Dia">
-                <span class="unit-label">mmHg</span>
-            </div>
+            <input type="number" id="v_bp_s" class="v-box bp-box" placeholder="Sys"> 
+            <span style="color:#ccc">/</span> 
+            <input type="number" id="v_bp_d" class="v-box bp-box" placeholder="Dia">
+            <span class="unit-label">mmHg</span>
         </div>
       </div>
     </div>
@@ -117,8 +109,8 @@
       <label>Review of Systems</label><textarea id="h_ros" rows="4"></textarea>
     </div>
 
-    <div class="footer-btns">
-      <button style="background: var(--dark);" onclick="alert('Saving...')">Save Session</button>
+    <div class="footer-btns" style="display:flex; gap:10px;">
+      <button style="background: var(--dark);" onclick="saveSession()">Save Session</button>
       <button style="background: #95a5a6;" onclick="location.reload()">Cancel</button>
     </div>
   </div>
@@ -126,21 +118,39 @@
 
 <script>
   let allPatients = JSON.parse(localStorage.getItem('patients')) || [];
+  let allSessions = JSON.parse(localStorage.getItem('sessions')) || [];
 
   function searchPatient() {
     const textQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+    const dateQuery = document.getElementById('searchDate').value;
     const resultsBody = document.getElementById('resultsBody');
+    const resultsArea = document.getElementById('resultsArea');
     resultsBody.innerHTML = ""; 
 
-    const matches = allPatients.filter(p => p.name.toLowerCase().includes(textQuery) || p.regNumber.includes(textQuery));
+    const matches = allPatients.filter(p => {
+        const nameMatch = p.name.toLowerCase().includes(textQuery);
+        const regMatch = p.regNumber.toLowerCase().includes(textQuery);
+        const pDate = p.entryTime ? p.entryTime.split('T')[0] : "";
+        const dateMatch = dateQuery ? (pDate === dateQuery) : true;
+        return textQuery ? (nameMatch || regMatch) && dateMatch : dateMatch;
+    });
 
     if (matches.length > 0) {
-      document.getElementById('resultsArea').style.display = "block";
+      resultsArea.style.display = "block";
       matches.forEach(p => {
-        resultsBody.innerHTML += `<tr style="border-bottom:1px solid #eee; cursor:pointer;" onclick='loadForm(${JSON.stringify(p)})'>
-            <td style="padding:10px;">${p.name}</td><td>${p.regNumber}</td></tr>`;
+        resultsBody.innerHTML += `<tr onclick='loadForm(${JSON.stringify(p)})'><td>${p.name}</td><td>${p.regNumber}</td><td>${p.entryTime ? p.entryTime.split('T')[0] : '--'}</td></tr>`;
       });
-    } else { alert("Not found."); }
+    } else { alert("Patient not found."); }
+  }
+
+  function startScanner() {
+    const readerElem = document.getElementById('reader');
+    readerElem.style.display = 'block';
+    const html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, (decodedText) => {
+        document.getElementById('searchInput').value = decodedText.trim();
+        setTimeout(() => { html5QrCode.stop().then(() => { readerElem.style.display = 'none'; searchPatient(); }); }, 800); 
+    }).catch(err => alert("Camera Error: " + err));
   }
 
   function loadForm(p) {
@@ -148,8 +158,11 @@
     document.getElementById('session-form').style.display = 'block';
     document.getElementById('p_photo').src = p.photo || '';
     
+    const visitNo = allSessions.filter(s => s.regNumber === p.regNumber).length + 1;
+    document.getElementById('visitDisplay').innerText = "VISIT NO: " + visitNo;
+
     const infoContainer = document.getElementById('p_info_details');
-    // Using your requested Abbreviations
+    // ABBREVIATIONS APPLIED HERE
     const fields = [
       { label: "Name:", val: p.name },
       { label: "Reg. No.:", val: p.regNumber },
@@ -168,6 +181,11 @@
     infoContainer.innerHTML = fields.map(f => f.val ? 
       `<div class="info-row"><span class="info-label">${f.label}</span><span class="info-value">${f.val}</span></div>` : ''
     ).join('');
+  }
+
+  function saveSession() {
+    alert("Session data would be saved here.");
+    location.reload();
   }
 </script>
 </body>
