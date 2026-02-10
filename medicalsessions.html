@@ -51,10 +51,16 @@
 
     .section-title { font-size: 1.2em; font-weight: bold; margin-bottom: 15px; color: var(--dark); text-transform: uppercase; }
     
-    /* Vitals Styling - Adjusted for Left Alignment & Fixed spacing */
+    /* Vitals Styling - REGULAR WEIGHT labels */
     .vitals-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: flex-start; margin-top: 10px; }
     .vital-item { display: flex; align-items: center; }
-    .vital-item label { font-weight: bold; font-size: 1em; color: #333; width: 60px; flex-shrink: 0; } /* Fixed width for labels */
+    .vital-item label { 
+      font-weight: normal; /* Regular weight as requested */
+      font-size: 1em; 
+      color: #333; 
+      width: 50px; /* Adjusted fixed width for spacing */
+      flex-shrink: 0; 
+    } 
     .vital-input-card { display: flex; align-items: center; background: white; border: 1px solid #ccc; padding: 5px 12px; border-radius: 8px; height: 40px; }
     .vital-input-card input { border: none; width: 50px; text-align: center; font-weight: bold; font-size: 1.1em; outline: none; background: transparent; margin: 0; padding: 0; }
     .vital-input-card span { font-size: 0.85em; color: #7f8c8d; margin-left: 5px; }
@@ -273,19 +279,19 @@
     });
   }
 
-  function handleFiles(e) {
-    const files = Array.from(e.target.files);
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        attachments.push(ev.target.result);
-        const img = document.createElement('img');
-        img.src = file.type === 'application/pdf' ? 'https://cdn-icons-png.flaticon.com/512/337/337946.png' : ev.target.result;
-        img.style.width = "60px"; img.style.borderRadius = "4px";
-        document.getElementById('fileList').appendChild(img);
-      };
-      reader.readAsDataURL(file);
-    });
+  function handleFiles(event) {
+    const files = event.target.files;
+    for (let file of files) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            attachments.push(e.target.result);
+            const preview = document.createElement('div');
+            preview.style.padding = "5px";
+            preview.innerText = file.name;
+            document.getElementById('fileList').appendChild(preview);
+        };
+        reader.readAsDataURL(file);
+    }
   }
 
   function saveSession() {
