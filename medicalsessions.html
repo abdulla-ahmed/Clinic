@@ -14,12 +14,9 @@
     .search-section { background: #eef4ff; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--primary); }
     h3 { text-align: center; margin-top: 0; }
     input, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 0.95em; }
-    
-    /* Date Label Fix */
     .search-date-label { display: block; margin-top: 10px; font-weight: bold; color: var(--dark); font-size: 0.9em; }
 
     #reader { width: 100%; max-width: 400px; margin: 10px auto; border-radius: 8px; border: 2px solid var(--primary); display: none;}
-    
     button { display: block; width: 100%; max-width: 450px; margin: 10px auto; padding: 10px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; color: white; transition: 0.2s; }
     .btn-search { background-color: var(--primary); }
     .btn-scan { background-color: #4CAF50; }
@@ -34,12 +31,12 @@
     /* Patient Profile Card */
     .patient-profile-column { display: flex; flex-direction: column; align-items: center; padding: 20px; background: #f0f4ff; border-radius: 12px; margin-bottom: 30px; border: 1px solid #ddecff; }
     .patient-photo { width: 150px; height: 180px; object-fit: cover; border: 4px solid white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-bottom: 15px; }
-    .info-list { width: 100%; max-width: 500px; }
-    .info-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(102, 152, 253, 0.2); }
-    .info-label { font-weight: bold; color: #555; width: 40%; }
-    .info-value { color: #000; text-align: right; width: 60%; }
+    .info-list { width: 100%; max-width: 550px; }
+    .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(102, 152, 253, 0.2); width: 100%; }
+    .info-label { font-weight: bold; color: #555; width: 45%; }
+    .info-value { color: #000; text-align: right; width: 55%; }
 
-    /* Medical Boxes */
+    /* Form Boxes */
     .group-box { padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(0,0,0,0.05); }
     .history-box { background-color: #fef9e7; border-left: 6px solid #f1c40f; }
     .vitals-box { background-color: #e8f8f5; border-left: 6px solid #1abc9c; }
@@ -61,7 +58,7 @@
     .preview-photo { width: 140px; height: 160px; object-fit: cover; border-radius: 8px; border: 3px solid var(--primary); }
     .preview-section-title { font-size: 1.1em; font-weight: bold; color: var(--primary); margin: 20px 0 10px 0; border-bottom: 2px solid #eee; }
     .preview-data-box { background: #fdfdfd; padding: 10px; border-radius: 6px; border: 1px solid #eee; white-space: pre-wrap; margin-bottom: 10px; }
-    .preview-row { margin-bottom: 8px; border-bottom: 1px solid #f9f9f9; padding-bottom: 4px; font-size: 0.95em; }
+    .preview-row { display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid #f1f1f1; padding-bottom: 4px; font-size: 0.95em; }
     .attachment-hint { display: block; background: #d4edda; color: #155724; padding: 8px; border-radius: 4px; font-size: 0.9em; margin-top: 10px; font-weight: bold; border: 1px solid #c3e6cb; }
     
     .footer-btns { display: flex; gap: 15px; margin-top: 30px; }
@@ -78,14 +75,11 @@
   <div class="search-section" id="search-block">
     <h3>Find Patient</h3>
     <input type="text" id="searchInput" placeholder="Search Name, Reg No, or Barcode">
-    
     <label class="search-date-label">Search by Date:</label>
     <input type="date" id="searchDate">
-    
     <div id="reader"></div>
     <button type="button" class="btn-scan" onclick="startScanner()">Open Barcode Scanner</button>
     <button type="button" class="btn-search" onclick="searchPatient()">Search Patient</button>
-    
     <div id="resultsArea" class="results-section">
       <table>
         <thead><tr><th>Name</th><th>Reg No</th><th>Visit Date</th></tr></thead>
@@ -167,10 +161,9 @@
   let selectedPatient = null;
   let attachments = [];
 
-  // FIXED SEARCH LOGIC (Matches your edit_patient.html function)
   function searchPatient() {
     const textQuery = document.getElementById('searchInput').value.toLowerCase().trim();
-    const dateQuery = document.getElementById('searchDate').value; // YYYY-MM-DD
+    const dateQuery = document.getElementById('searchDate').value;
     const resultsBody = document.getElementById('resultsBody');
     const resultsArea = document.getElementById('resultsArea');
     resultsBody.innerHTML = ""; 
@@ -178,10 +171,8 @@
     const matches = allPatients.filter(p => {
         const nameMatch = p.name.toLowerCase().includes(textQuery);
         const regMatch = p.regNumber.toLowerCase().includes(textQuery);
-        // Link logic: Extracting YYYY-MM-DD from entryTime
         const pDate = p.entryTime ? p.entryTime.split('T')[0] : "";
         const dateMatch = dateQuery ? (pDate === dateQuery) : true;
-        
         return (textQuery) ? (nameMatch || regMatch) && dateMatch : dateMatch;
     });
 
@@ -215,12 +206,14 @@
     const infoContainer = document.getElementById('p_info_details');
     infoContainer.innerHTML = "";
 
-    // FULL RESTORED PATIENT DATA
+    // ALL DATA FIELDS - ONE PER LINE
     const fields = [
       { label: "Name", val: p.name },
-      { label: "Reg No", val: p.regNumber },
-      { label: "Age/Sex", val: (p.age || '--') + " / " + (p.sex || '--') },
-      { label: "Race/Religion", val: (p.race || '--') + " / " + (p.religion || '--') },
+      { label: "Registration No", val: p.regNumber },
+      { label: "Age", val: p.age },
+      { label: "Sex", val: p.sex },
+      { label: "Race", val: p.race },
+      { label: "Religion", val: p.religion },
       { label: "Blood Group", val: p.bloodGroup },
       { label: "Occupation", val: p.occupation },
       { label: "Address", val: p.address },
@@ -230,7 +223,7 @@
     ];
 
     fields.forEach(f => {
-      if (f.val && f.val !== " / ") {
+      if (f.val) {
         infoContainer.innerHTML += `<div class="info-row"><span class="info-label">${f.label}:</span><span class="info-value">${f.val}</span></div>`;
       }
     });
@@ -256,21 +249,34 @@
     const p = selectedPatient;
     document.getElementById('prev_p_photo').src = p.photo || '';
     
-    // FULL PREVIEW DATA BELOW PHOTO
-    document.getElementById('preview-id-section').innerHTML = `
-      <div class="preview-row"><strong>Full Name:</strong> ${p.name} | <strong>Reg No:</strong> ${p.regNumber}</div>
-      <div class="preview-row"><strong>Age/Sex:</strong> ${p.age || '--'} / ${p.sex || '--'} | <strong>Blood:</strong> ${p.bloodGroup || '--'}</div>
-      <div class="preview-row"><strong>Occupation:</strong> ${p.occupation || '--'}</div>
-      <div class="preview-row"><strong>Next of Kin:</strong> ${p.nextOfKin || '--'} (${p.kinOccupation || '--'})</div>
-      <div class="preview-row"><strong>Kin Phone:</strong> ${p.kinPhone || '--'} | <strong>Address:</strong> ${p.address || '--'}</div>
-      <div class="preview-row" style="background:#f0f4ff; padding:5px;"><strong>Status:</strong> Visit #${p.currentVisitNo} | ${new Date().toLocaleString()}</div>
-    `;
+    // PREVIEW: ONE FIELD PER LINE
+    const idFields = [
+      { label: "Full Name", val: p.name },
+      { label: "Reg Number", val: p.regNumber },
+      { label: "Age", val: p.age },
+      { label: "Sex", val: p.sex },
+      { label: "Race", val: p.race },
+      { label: "Religion", val: p.religion },
+      { label: "Blood Group", val: p.bloodGroup },
+      { label: "Occupation", val: p.occupation },
+      { label: "Address", val: p.address },
+      { label: "Next of Kin", val: p.nextOfKin },
+      { label: "Kin Occupation", val: p.kinOccupation },
+      { label: "Kin Phone", val: p.kinPhone },
+      { label: "Visit Info", val: `Visit #${p.currentVisitNo} | ${new Date().toLocaleString()}` }
+    ];
+
+    let idHtml = "";
+    idFields.forEach(f => {
+       if(f.val) idHtml += `<div class="preview-row"><strong>${f.label}:</strong> <span>${f.val}</span></div>`;
+    });
+    document.getElementById('preview-id-section').innerHTML = idHtml;
 
     let html = `
       <div class="preview-section-title">Vital Signs</div>
       <div class="preview-row">
-        <strong>Temp:</strong> ${document.getElementById('v_temp').value || '--'} C° | <strong>HR:</strong> ${document.getElementById('v_hr').value || '--'} bpm | 
-        <strong>RR:</strong> ${document.getElementById('v_rr').value || '--'} bpm | <strong>BP:</strong> ${document.getElementById('v_bp_s').value || '--'}/${document.getElementById('v_bp_d').value || '--'} mmHg
+        <strong>Vitals:</strong> 
+        <span>Temp: ${document.getElementById('v_temp').value || '--'}° | HR: ${document.getElementById('v_hr').value || '--'} | RR: ${document.getElementById('v_rr').value || '--'} | BP: ${document.getElementById('v_bp_s').value || '--'}/${document.getElementById('v_bp_d').value || '--'}</span>
       </div>
       <div class="preview-section-title">Clinical History</div>
     `;
