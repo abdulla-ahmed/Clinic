@@ -15,28 +15,29 @@
     h3 { text-align: center; margin-top: 0; }
     input, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 0.95em; }
     
+    /* Date Search Label Styling */
+    .date-label { display: block; font-weight: bold; margin-top: 10px; color: #555; font-size: 0.9em; }
+
     #reader { width: 100%; max-width: 400px; margin: 10px auto; border-radius: 8px; border: 2px solid var(--primary); display: none;}
     
     button { display: block; width: 100%; max-width: 450px; margin: 10px auto; padding: 10px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; color: white; transition: 0.2s; }
     .btn-search { background-color: var(--primary); }
     .btn-scan { background-color: #4CAF50; }
 
-    /* Results Table - Reduced Font to fit on one line */
+    /* Results Table - Fixed to 11px to match edit_patient and stay on one line */
     .results-section { display: none; margin-top: 20px; width: 100%; overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; /* Small font like edit_patient */ }
-    th, td { border: 1px solid #ddd; padding: 6px 4px; text-align: left; white-space: nowrap; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; table-layout: fixed; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; white-space: nowrap; overflow: hidden; }
     th { background-color: var(--primary); color: white; }
     tr:hover { background: #ddecff; cursor: pointer; }
 
     /* Patient Profile Card */
     .patient-profile-column { display: flex; flex-direction: column; align-items: center; padding: 20px; background: #f0f4ff; border-radius: 12px; margin-bottom: 30px; border: 1px solid #ddecff; }
     .patient-photo { width: 150px; height: 180px; object-fit: cover; border: 4px solid white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-bottom: 15px; }
-    
-    .info-list { width: 100%; }
-    .info-row { display: flex; padding: 8px 0; border-bottom: 1px solid rgba(102, 152, 253, 0.2); width: 100%; box-sizing: border-box; }
-    .info-label { font-weight: bold; color: #555; width: 30%; min-width: 120px; flex-shrink: 0; }
-    /* info-value fixed to prevent text overflow */
-    .info-value { color: #000; flex: 1; word-wrap: break-word; overflow-wrap: break-word; text-align: left; padding-left: 10px; }
+    .info-list { width: 100%; max-width: 500px; }
+    .info-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(102, 152, 253, 0.2); }
+    .info-label { font-weight: bold; color: #555; }
+    .info-value { color: #000; text-align: right; }
 
     /* Grouped Shaded Boxes */
     .group-box { padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(0,0,0,0.05); }
@@ -47,9 +48,10 @@
 
     .section-title { font-size: 1.2em; font-weight: bold; margin-bottom: 15px; color: var(--dark); text-transform: uppercase; }
     
+    /* Vitals Styling */
     .vitals-grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-top: 10px; }
     .vital-input-card { display: flex; align-items: center; background: white; border: 1px solid #ccc; padding: 8px 15px; border-radius: 8px; }
-    .vital-input-card input { border: none; width: 60px; text-align: center; font-weight: bold; font-size: 1.1em; outline: none; background: transparent; }
+    .vital-input-card input { border: none; width: 60px; margin: 0; padding: 0; text-align: center; font-weight: bold; font-size: 1.1em; outline: none; background: transparent; }
     .vital-input-card span { font-size: 0.9em; color: #7f8c8d; margin-left: 8px; }
 
     .footer-btns { display: flex; gap: 15px; margin-top: 30px; }
@@ -67,6 +69,8 @@
   <div class="search-section" id="search-block">
     <h3>Find Patient</h3>
     <input type="text" id="searchInput" placeholder="Search Name or Reg No. or Barcode">
+    
+    <label class="date-label">Search by Registration Date:</label>
     <input type="date" id="searchDate">
     
     <div id="reader"></div>
@@ -76,11 +80,11 @@
     <div id="resultsArea" class="results-section">
       <table>
         <thead>
-            <tr>
-                <th>Name</th>
-                <th>Reg No</th>
-                <th>Visit Date</th>
-            </tr>
+          <tr>
+            <th style="width: 40%;">Name</th>
+            <th style="width: 30%;">Reg No</th>
+            <th style="width: 30%;">Reg Date</th>
+          </tr>
         </thead>
         <tbody id="resultsBody"></tbody>
       </table>
@@ -162,8 +166,13 @@
     const matches = allPatients.filter(p => {
         const nameMatch = p.name.toLowerCase().includes(textQuery);
         const regMatch = p.regNumber.toLowerCase().includes(textQuery);
-        const dateMatch = dateQuery ? p.entryTime.startsWith(dateQuery) : true;
-        return (textQuery || dateQuery) ? ((nameMatch || regMatch) && dateMatch) : false;
+        const dateMatch = dateQuery ? (p.entryTime && p.entryTime.startsWith(dateQuery)) : true;
+        
+        // Match logic: If text provided, name/reg must match. If date provided, date must match.
+        if(textQuery && dateQuery) return (nameMatch || regMatch) && dateMatch;
+        if(textQuery) return (nameMatch || regMatch);
+        if(dateQuery) return dateMatch;
+        return false;
     });
 
     if (matches.length > 0) {
