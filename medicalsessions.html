@@ -58,22 +58,17 @@
     /* Preview Overlay Styles */
     #preview-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
     .preview-content { background: white; max-width: 800px; margin: auto; padding: 30px; border-radius: 12px; }
-    .preview-photo { width: 120px; height: 140px; object-fit: cover; border-radius: 6px; border: 2px solid var(--primary); display: block; }
+    .preview-photo { width: 120px; height: 140px; object-fit: cover; border-radius: 6px; border: 2px solid var(--primary); }
     .preview-section-title { font-size: 1.1em; font-weight: bold; color: var(--primary); margin: 20px 0 10px 0; border-bottom: 2px solid #eee; padding-bottom: 5px; }
     .preview-data-box { background: #fdfdfd; padding: 10px; border-radius: 6px; border: 1px solid #eee; white-space: pre-wrap; margin-bottom: 10px; font-size: 0.95em; line-height: 1.4; }
-    .preview-row { margin-bottom: 8px; border-bottom: 1px solid #f9f9f9; padding-bottom: 4px; }
-    .attachment-hint { display: inline-block; background: #eef4ff; color: #3498db; padding: 4px 8px; border-radius: 4px; font-size: 0.85em; margin-top: 5px; font-weight: bold; }
+    .preview-row { margin-bottom: 8px; border-bottom: 1px solid #f9f9f9; padding-bottom: 4px; font-size: 0.95em; }
+    .attachment-hint { display: block; background: #d4edda; color: #155724; padding: 8px; border-radius: 4px; font-size: 0.9em; margin-top: 10px; font-weight: bold; border: 1px solid #c3e6cb; }
     
     .footer-btns { display: flex; gap: 15px; margin-top: 30px; }
     .btn-save { background: #2c3e50; }
     .btn-cancel { background: #95a5a6; }
     .btn-edit { background: #f39c12; }
     .btn-final { background: #27ae60; }
-
-    @media (max-width: 600px) {
-      .vitals-grid { justify-content: flex-start; padding-left: 5px; }
-      .container { padding: 15px; margin: 10px; }
-    }
 
     #session-form { display: none; }
   </style>
@@ -154,14 +149,11 @@
 <div id="preview-overlay">
   <div class="preview-content">
     <h2 style="text-align:center; color: var(--primary); margin-bottom: 20px;">Visit Summary Report</h2>
-    
     <div style="display: flex; gap: 20px; align-items: flex-start; margin-bottom: 20px;">
         <img id="prev_p_photo" class="preview-photo" src="" alt="No Photo">
         <div id="preview-id-section" style="flex: 1;"></div>
     </div>
-
     <div id="preview-data"></div>
-    
     <div class="footer-btns">
       <button class="btn-edit" onclick="closePreview()">Return & Edit</button>
       <button class="btn-final" onclick="finalSaveSession()">Save & Finish</button>
@@ -182,8 +174,6 @@
     const resultsArea = document.getElementById('resultsArea');
     resultsBody.innerHTML = ""; 
     document.getElementById('session-form').style.display = 'none';
-
-    if (!textQuery && !dateQuery) return;
 
     const matches = allPatients.filter(p => {
         const nameMatch = p.name.toLowerCase().includes(textQuery);
@@ -221,13 +211,20 @@
     document.getElementById('p_photo').src = p.photo || '';
     const infoContainer = document.getElementById('p_info_details');
     infoContainer.innerHTML = "";
+
+    // RESTORED ALL PATIENT INFO FIELDS
     const fields = [
       { label: "Patient Name", val: p.name },
       { label: "Registration No", val: p.regNumber },
       { label: "Age", val: p.age },
       { label: "Sex", val: p.sex },
-      { label: "Phone", val: p.phone }
+      { label: "Race", val: p.race },
+      { label: "Religion", val: p.religion },
+      { label: "Blood Group", val: p.bloodGroup },
+      { label: "Phone", val: p.phone },
+      { label: "Address", val: p.address }
     ];
+
     fields.forEach(f => {
       if (f.val) infoContainer.innerHTML += `<div class="info-row"><span class="info-label">${f.label}:</span><span class="info-value">${f.val}</span></div>`;
     });
@@ -238,10 +235,10 @@
     for (let file of files) {
         const reader = new FileReader();
         reader.onload = (e) => {
-            attachments.push(e.target.result);
+            attachments.push({ name: file.name, data: e.target.result });
             const preview = document.createElement('div');
-            preview.style.cssText = "padding:5px; background:#eee; border-radius:4px; font-size:10px;";
-            preview.innerText = file.name;
+            preview.style.cssText = "padding:5px; background:#eee; border-radius:4px; font-size:10px; border:1px solid #ccc;";
+            preview.innerText = "📄 " + file.name;
             document.getElementById('fileList').appendChild(preview);
         };
         reader.readAsDataURL(file);
@@ -250,13 +247,17 @@
 
   function generatePreview() {
     if (!selectedPatient) return;
+    const p = selectedPatient;
     
-    document.getElementById('prev_p_photo').src = selectedPatient.photo || '';
+    document.getElementById('prev_p_photo').src = p.photo || '';
+    
+    // RESTORED ALL IDENTIFICATION IN PREVIEW
     document.getElementById('preview-id-section').innerHTML = `
-      <div class="preview-row"><strong>Name:</strong> ${selectedPatient.name}</div>
-      <div class="preview-row"><strong>Reg No:</strong> ${selectedPatient.regNumber}</div>
-      <div class="preview-row"><strong>Visit No:</strong> ${selectedPatient.currentVisitNo}</div>
-      <div class="preview-row"><strong>Date:</strong> ${new Date().toLocaleString()}</div>
+      <div class="preview-row"><strong>Name:</strong> ${p.name}</div>
+      <div class="preview-row"><strong>Reg No:</strong> ${p.regNumber}</div>
+      <div class="preview-row"><strong>Age/Sex:</strong> ${p.age || '--'} / ${p.sex || '--'}</div>
+      <div class="preview-row"><strong>Blood Group:</strong> ${p.bloodGroup || '--'}</div>
+      <div class="preview-row"><strong>Visit No:</strong> ${p.currentVisitNo} | <strong>Date:</strong> ${new Date().toLocaleString()}</div>
     `;
 
     let html = `
@@ -283,14 +284,17 @@
       if (val) html += `<div><strong>${field.label}:</strong></div><div class="preview-data-box">${val}</div>`;
     });
 
+    // FIXED INVESTIGATION HINT
     const fileCount = attachments.length;
-    const attachmentHint = fileCount > 0 ? `<div class="attachment-hint">📎 ${fileCount} investigation file(s) attached</div>` : `<div style="color:#999; font-size:0.8em;">No files uploaded</div>`;
+    const attachmentHint = fileCount > 0 
+      ? `<div class="attachment-hint">📎 INVESTIGATIONS ATTACHED: ${fileCount} file(s)</div>` 
+      : `<div style="color:#e74c3c; font-size:0.8em; margin-top:5px;">⚠️ No files uploaded</div>`;
 
     html += `
       <div class="preview-section-title">Physical Examination</div>
       <div class="preview-data-box">${document.getElementById('exam_details').value || 'No examination recorded.'}</div>
       <div class="preview-section-title">Investigations & Notes</div>
-      <div class="preview-data-box">${document.getElementById('inv_notes').value || 'No additional notes.'}${attachmentHint}</div>
+      <div class="preview-data-box">${document.getElementById('inv_notes').value || 'No additional notes.'} ${attachmentHint}</div>
     `;
 
     document.getElementById('preview-data').innerHTML = html;
