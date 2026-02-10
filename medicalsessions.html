@@ -15,7 +15,6 @@
     h3 { text-align: center; margin-top: 0; }
     input, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 0.95em; }
     
-    /* Search by Date logic */
     input[type="date"]::before {
       content: "Search by Date: ";
       color: #666;
@@ -52,13 +51,19 @@
 
     .section-title { font-size: 1.2em; font-weight: bold; margin-bottom: 15px; color: var(--dark); text-transform: uppercase; }
     
-    /* Vitals Styling with Labels BESIDE boxes */
-    .vitals-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-top: 10px; }
-    .vital-item { display: flex; align-items: center; gap: 10px; } /* Row alignment */
-    .vital-item label { font-weight: bold; font-size: 1em; color: #333; min-width: 45px; }
+    /* Vitals Styling - Adjusted for Left Alignment & Fixed spacing */
+    .vitals-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: flex-start; margin-top: 10px; }
+    .vital-item { display: flex; align-items: center; }
+    .vital-item label { font-weight: bold; font-size: 1em; color: #333; width: 60px; flex-shrink: 0; } /* Fixed width for labels */
     .vital-input-card { display: flex; align-items: center; background: white; border: 1px solid #ccc; padding: 5px 12px; border-radius: 8px; height: 40px; }
     .vital-input-card input { border: none; width: 50px; text-align: center; font-weight: bold; font-size: 1.1em; outline: none; background: transparent; margin: 0; padding: 0; }
     .vital-input-card span { font-size: 0.85em; color: #7f8c8d; margin-left: 5px; }
+
+    /* Mobile View Alignment */
+    @media (max-width: 600px) {
+      .vitals-grid { justify-content: flex-start; padding-left: 5px; }
+      .container { padding: 15px; margin: 10px; }
+    }
 
     .footer-btns { display: flex; gap: 15px; margin-top: 30px; }
     .btn-save { background: #2c3e50; }
@@ -118,10 +123,10 @@
     </div>
 
     <div class="group-box vitals-box">
-      <div class="section-title" style="text-align:center;">Vital Signs</div>
+      <div class="section-title">Vital Signs</div>
       <div class="vitals-grid">
         <div class="vital-item">
-          <label>Temp.</label>
+          <label>Temp</label>
           <div class="vital-input-card">
             <input type="number" id="v_temp"> <span>C°</span>
           </div>
