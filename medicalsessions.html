@@ -15,7 +15,6 @@
     h3 { text-align: center; margin-top: 0; }
     input, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 1em; }
     .search-date-label { display: block; margin-top: 10px; font-weight: bold; color: var(--dark); font-size: 0.9em; }
-
     #reader { width: 100%; max-width: 400px; margin: 10px auto; border-radius: 8px; border: 2px solid var(--primary); display: none;}
     
     button { display: block; width: 100%; max-width: 450px; margin: 10px auto; padding: 12px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; color: white; transition: 0.2s; }
@@ -29,7 +28,7 @@
     th { background-color: var(--primary); color: white; }
     tr:hover { background: #ddecff; cursor: pointer; }
 
-    /* Patient Info - SMALL FONT */
+    /* Patient Info - SMALL FONT ONE LINE */
     .patient-profile-column { display: flex; flex-direction: column; align-items: center; padding: 15px; background: #f0f4ff; border-radius: 12px; margin-bottom: 30px; border: 1px solid #ddecff; }
     .patient-photo { width: 130px; height: 150px; object-fit: cover; border: 4px solid white; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-bottom: 15px; }
     .info-list { width: 100%; max-width: 600px; font-size: 0.82em; } 
@@ -49,12 +48,14 @@
     .inv-box { background-color: #fdf2f2; border-left: 6px solid #e74c3c; }
     .section-title { font-size: 1.1em; font-weight: bold; margin-bottom: 15px; text-transform: uppercase; }
 
-    /* Preview Overlay */
-    #preview-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; overflow-y: auto; padding: 20px; }
-    .preview-content { background: white; max-width: 800px; margin: auto; padding: 30px; border-radius: 12px; }
-    .preview-row { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 4px 0; font-size: 0.85em; }
-    .preview-data-box { background: #f9f9f9; padding: 10px; border: 1px solid #eee; margin-bottom: 10px; font-size: 0.9em; white-space: pre-wrap; }
-
+    /* Detailed Preview Overlay */
+    #preview-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; overflow-y: auto; padding: 20px; }
+    .preview-content { background: white; max-width: 850px; margin: auto; padding: 40px; border-radius: 12px; font-family: "Times New Roman", serif; }
+    .preview-header { text-align: center; border-bottom: 2px solid var(--primary); padding-bottom: 10px; margin-bottom: 20px; }
+    .preview-section-title { background: #f0f4ff; padding: 5px 10px; font-weight: bold; color: var(--primary); margin: 20px 0 10px 0; border-left: 4px solid var(--primary); }
+    .preview-row { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 5px 0; font-size: 0.85em; }
+    .preview-data-box { background: #fff; border: 1px solid #ddd; padding: 10px; margin-bottom: 15px; font-size: 0.95em; white-space: pre-wrap; min-height: 30px; }
+    
     #session-form { display: none; }
   </style>
 </head>
@@ -90,15 +91,15 @@
     <div class="group-box vitals-box">
       <div class="section-title">Vital Signs</div>
       <div class="vitals-grid">
-        <div class="vital-item"><label>Temp</label><input type="number" id="v_temp" class="v-box"> <span style="font-size:0.9em">C°</span></div>
-        <div class="vital-item"><label>HR</label><input type="number" id="v_hr" class="v-box"> <span style="font-size:0.9em">bpm</span></div>
-        <div class="vital-item"><label>RR</label><input type="number" id="v_rr" class="v-box"> <span style="font-size:0.9em">bpm</span></div>
+        <div class="vital-item"><label>Temp</label><input type="number" id="v_temp" class="v-box"> <span class="unit-label">C°</span></div>
+        <div class="vital-item"><label>HR</label><input type="number" id="v_hr" class="v-box"> <span class="unit-label">bpm</span></div>
+        <div class="vital-item"><label>RR</label><input type="number" id="v_rr" class="v-box"> <span class="unit-label">bpm</span></div>
         <div class="vital-item">
             <label>BP</label>
             <input type="number" id="v_bp_s" class="v-box bp-box" placeholder="Sys"> 
             <span style="color:#ccc">/</span> 
             <input type="number" id="v_bp_d" class="v-box bp-box" placeholder="Dia">
-            <span style="font-size:0.9em">mmHg</span>
+            <span class="unit-label">mmHg</span>
         </div>
       </div>
     </div>
@@ -131,7 +132,7 @@
     </div>
 
     <div class="footer-btns" style="display:flex; gap:15px; margin-top:20px;">
-      <button style="background: var(--dark);" onclick="generatePreview()">Preview Session</button>
+      <button style="background: var(--dark);" onclick="generatePreview()">Preview Full Report</button>
       <button style="background: #95a5a6;" onclick="location.reload()">Cancel</button>
     </div>
   </div>
@@ -139,12 +140,29 @@
 
 <div id="preview-overlay">
   <div class="preview-content">
-    <h2 style="text-align:center; color: var(--primary);">Visit Summary Report</h2>
+    <div class="preview-header">
+      <h2>AL-KAWAZ CLINIC - PATIENT VISIT SUMMARY</h2>
+      <p id="preview-visit-info" style="font-weight: bold;"></p>
+    </div>
+
+    <div class="preview-section-title">PATIENT INFORMATION</div>
     <div id="preview-id-section"></div>
-    <div id="preview-data"></div>
-    <div class="footer-btns" style="display:flex; gap:15px; margin-top:20px;">
-      <button style="background: #f39c12;" onclick="document.getElementById('preview-overlay').style.display='none'">Edit</button>
-      <button style="background: #27ae60;" onclick="saveFinal()">Save & Finish</button>
+
+    <div class="preview-section-title">VITAL SIGNS</div>
+    <div id="preview-vitals-section" style="padding: 10px 0; font-size: 1.1em; border-bottom: 1px solid #eee;"></div>
+
+    <div class="preview-section-title">CLINICAL HISTORY</div>
+    <div id="preview-history-section"></div>
+
+    <div class="preview-section-title">PHYSICAL EXAMINATION</div>
+    <div id="preview-exam-section" class="preview-data-box"></div>
+
+    <div class="preview-section-title">INVESTIGATIONS & NOTES</div>
+    <div id="preview-inv-section" class="preview-data-box"></div>
+
+    <div class="footer-btns" style="display:flex; gap:15px; margin-top:30px;">
+      <button style="background: #f39c12;" onclick="document.getElementById('preview-overlay').style.display='none'">Edit Report</button>
+      <button style="background: #27ae60;" onclick="saveFinal()">Save & Print</button>
     </div>
   </div>
 </div>
@@ -174,7 +192,7 @@
       matches.forEach(p => {
         resultsBody.innerHTML += `<tr onclick='loadForm(${JSON.stringify(p)})'><td>${p.name}</td><td>${p.regNumber}</td><td>${p.entryTime ? p.entryTime.split('T')[0] : '--'}</td></tr>`;
       });
-    } else { alert("Not found."); }
+    } else { alert("Patient not found."); }
   }
 
   function startScanner() {
@@ -199,16 +217,11 @@
     const fields = [
       { label: "Name:", val: p.name },
       { label: "Reg. No.:", val: p.regNumber },
-      { label: "Age:", val: p.age },
-      { label: "Sex:", val: p.sex },
-      { label: "Race:", val: p.race },
-      { label: "Religion:", val: p.religion },
-      { label: "Bl. gr. & Rh:", val: p.bloodGroup },
-      { label: "Occupation:", val: p.occupation },
-      { label: "Address:", val: p.address },
-      { label: "Next of Kin:", val: p.nextOfKin },
-      { label: "Kin Add.:", val: p.kinAddress },
-      { label: "Kin Phone:", val: p.kinPhone }
+      { label: "Age:", val: p.age }, { label: "Sex:", val: p.sex },
+      { label: "Race:", val: p.race }, { label: "Religion:", val: p.religion },
+      { label: "Bl. gr. & Rh:", val: p.bloodGroup }, { label: "Occupation:", val: p.occupation },
+      { label: "Address:", val: p.address }, { label: "Next of Kin:", val: p.nextOfKin },
+      { label: "Kin Add.:", val: p.kinAddress }, { label: "Kin Phone:", val: p.kinPhone }
     ];
 
     document.getElementById('p_info_details').innerHTML = fields.map(f => f.val ? 
@@ -227,33 +240,62 @@
 
   function generatePreview() {
     const p = selectedPatient;
-    let idHtml = "";
+    const dateNow = new Date().toLocaleString();
+    document.getElementById('preview-visit-info').innerText = "Date: " + dateNow;
+
+    // 1. Patient Info Summary
     const fields = [
-      { label: "Name", val: p.name }, { label: "Reg. No.", val: p.regNumber },
-      { label: "Bl. gr. & Rh", val: p.bloodGroup }, { label: "Kin Phone", val: p.kinPhone }
+      { label: "Full Name", val: p.name },
+      { label: "Reg. No.", val: p.regNumber },
+      { label: "Age/Sex", val: p.age + " / " + p.sex },
+      { label: "Bl. gr. & Rh", val: p.bloodGroup },
+      { label: "Address", val: p.address },
+      { label: "Kin Phone", val: p.kinPhone }
     ];
-    fields.forEach(f => idHtml += `<div class="preview-row"><strong>${f.label}:</strong><span>${f.val}</span></div>`);
-    document.getElementById('preview-id-section').innerHTML = idHtml;
+    document.getElementById('preview-id-section').innerHTML = fields.map(f => 
+      `<div class="preview-row"><strong>${f.label}:</strong><span>${f.val}</span></div>`).join('');
 
-    let dataHtml = `<div class="preview-row"><strong>Vitals:</strong> <span>T: ${document.getElementById('v_temp').value}° | HR: ${document.getElementById('v_hr').value} | RR: ${document.getElementById('v_rr').value} | BP: ${document.getElementById('v_bp_s').value}/${document.getElementById('v_bp_d').value}</span></div>`;
-    
-    const textFields = [
-        { label: "Chief Complain", id: "h_chief" }, { label: "Present Illness", id: "h_illness" },
-        { label: "Past Medical", id: "h_past_med" }, { label: "Past Surgical", id: "h_past_surg" },
-        { label: "Examination", id: "exam_details" }, { label: "Investigations/Notes", id: "inv_notes" }
+    // 2. Vitals Summary
+    document.getElementById('preview-vitals-section').innerHTML = 
+      `Temp: ${document.getElementById('v_temp').value || '--'} C° | ` +
+      `HR: ${document.getElementById('v_hr').value || '--'} bpm | ` +
+      `RR: ${document.getElementById('v_rr').value || '--'} bpm | ` +
+      `BP: ${document.getElementById('v_bp_s').value || '--'}/${document.getElementById('v_bp_d').value || '--'} mmHg`;
+
+    // 3. FULL History Summary (All Fields)
+    const historyFields = [
+        { label: "Chief Complain", id: "h_chief" },
+        { label: "Present Illness", id: "h_illness" },
+        { label: "Review of Systems", id: "h_ros" },
+        { label: "Past-Medical History", id: "h_past_med" },
+        { label: "Past-Surgical History", id: "h_past_surg" },
+        { label: "Drug History", id: "h_drugs" },
+        { label: "Allergies", id: "h_allergies" },
+        { label: "Blood Transfusion", id: "h_blood" },
+        { label: "Family History", id: "h_family" },
+        { label: "Social History", id: "h_social" }
     ];
     
-    textFields.forEach(f => {
-        const val = document.getElementById(f.id).value;
-        if(val) dataHtml += `<div style="font-weight:bold; font-size:0.9em; margin-top:10px;">${f.label}:</div><div class="preview-data-box">${val}</div>`;
+    let histHtml = "";
+    historyFields.forEach(f => {
+        const val = document.getElementById(f.id).value.trim();
+        if (val) {
+            histHtml += `<div style="font-weight:bold; margin-top:8px;">${f.label}:</div><div class="preview-data-box">${val}</div>`;
+        }
     });
+    document.getElementById('preview-history-section').innerHTML = histHtml || "No clinical history recorded.";
 
-    document.getElementById('preview-data').innerHTML = dataHtml;
+    // 4. Physical Exam
+    document.getElementById('preview-exam-section').innerText = document.getElementById('exam_details').value || "No examination recorded.";
+
+    // 5. Investigations
+    document.getElementById('preview-inv-section').innerText = document.getElementById('inv_notes').value || "No notes.";
+
     document.getElementById('preview-overlay').style.display = 'block';
   }
 
   function saveFinal() {
-    alert("Session Saved Successfully!");
+    alert("Session Successfully Saved and Ready for Printing!");
     location.href = 'mainpage.html';
   }
 </script>
