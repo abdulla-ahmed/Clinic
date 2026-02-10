@@ -15,8 +15,14 @@
     h3 { text-align: center; margin-top: 0; }
     input, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 0.95em; }
     
-    /* Search by Date Label */
-    .date-label { font-weight: bold; display: block; margin-top: 10px; color: #555; font-size: 0.9em; }
+    /* IMPROVED DATE LABEL */
+    .date-label { 
+      display: block; 
+      font-weight: bold; 
+      margin: 15px 0 5px 0; 
+      color: #333; /* Darker color for visibility */
+      font-size: 1.05em; 
+    }
 
     #reader { width: 100%; max-width: 400px; margin: 10px auto; border-radius: 8px; border: 2px solid var(--primary); display: none;}
     
@@ -24,7 +30,7 @@
     .btn-search { background-color: var(--primary); }
     .btn-scan { background-color: #4CAF50; }
 
-    /* Results Table - 11px font to keep data on one line */
+    /* Results Table */
     .results-section { display: none; margin-top: 20px; width: 100%; overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; table-layout: fixed; }
     th, td { border: 1px solid #ddd; padding: 8px; text-align: left; white-space: nowrap; overflow: hidden; }
@@ -48,7 +54,6 @@
 
     .section-title { font-size: 1.2em; font-weight: bold; margin-bottom: 15px; color: var(--dark); text-transform: uppercase; }
     
-    /* Vitals Styling */
     .vitals-grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-top: 10px; }
     .vital-input-card { display: flex; align-items: center; background: white; border: 1px solid #ccc; padding: 8px 15px; border-radius: 8px; }
     .vital-input-card input { border: none; width: 60px; margin: 0; padding: 0; text-align: center; font-weight: bold; font-size: 1.1em; outline: none; background: transparent; }
@@ -68,9 +73,10 @@
 
   <div class="search-section" id="search-block">
     <h3>Find Patient</h3>
+    
     <input type="text" id="searchInput" placeholder="Search Name or Reg No. or Barcode">
     
-    <label class="date-label">Search by Date:</label>
+    <label for="searchDate" class="date-label">Search by Date:</label>
     <input type="date" id="searchDate">
     
     <div id="reader"></div>
