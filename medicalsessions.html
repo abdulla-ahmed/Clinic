@@ -15,7 +15,7 @@
     h3 { text-align: center; margin-top: 0; }
     input, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 0.95em; }
     
-    /* Date input label logic from edit_patient.html */
+    /* Search by Date logic */
     input[type="date"]::before {
       content: "Search by Date: ";
       color: #666;
@@ -52,12 +52,12 @@
 
     .section-title { font-size: 1.2em; font-weight: bold; margin-bottom: 15px; color: var(--dark); text-transform: uppercase; }
     
-    /* Vitals Styling with External Labels */
+    /* Vitals Styling with Labels BESIDE boxes */
     .vitals-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-top: 10px; }
-    .vital-item { display: flex; flex-direction: column; align-items: flex-start; }
-    .vital-item label { font-weight: bold; font-size: 0.9em; margin-bottom: 4px; color: #333; }
-    .vital-input-card { display: flex; align-items: center; background: white; border: 1px solid #ccc; padding: 5px 10px; border-radius: 8px; height: 40px; }
-    .vital-input-card input { border: none; width: 50px; text-align: center; font-weight: bold; font-size: 1em; outline: none; background: transparent; margin: 0; padding: 0; }
+    .vital-item { display: flex; align-items: center; gap: 10px; } /* Row alignment */
+    .vital-item label { font-weight: bold; font-size: 1em; color: #333; min-width: 45px; }
+    .vital-input-card { display: flex; align-items: center; background: white; border: 1px solid #ccc; padding: 5px 12px; border-radius: 8px; height: 40px; }
+    .vital-input-card input { border: none; width: 50px; text-align: center; font-weight: bold; font-size: 1.1em; outline: none; background: transparent; margin: 0; padding: 0; }
     .vital-input-card span { font-size: 0.85em; color: #7f8c8d; margin-left: 5px; }
 
     .footer-btns { display: flex; gap: 15px; margin-top: 30px; }
