@@ -16,6 +16,9 @@
     input, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 0.95em; }
     textarea { resize: vertical; }
 
+    /* Search Date Label Restored */
+    .date-input-group::before { content: "Search by Date: "; font-weight: bold; color: #555; display: block; margin-bottom: 2px; }
+
     #reader { width: 100%; max-width: 400px; margin: 10px auto; border-radius: 8px; border: 2px solid var(--primary); display: none;}
     
     button { display: block; width: 100%; max-width: 450px; margin: 10px auto; padding: 10px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; color: white; transition: 0.2s; }
@@ -46,7 +49,7 @@
 
     .section-title { font-size: 1.2em; font-weight: bold; margin-bottom: 15px; color: var(--dark); text-transform: uppercase; }
     
-    /* Vitals */
+    /* Vitals Styling */
     .vitals-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: flex-start; margin-top: 10px; }
     .vital-item { display: flex; align-items: center; }
     .vital-item label { font-weight: normal; font-size: 1em; color: #333; width: 50px; flex-shrink: 0; } 
@@ -57,7 +60,6 @@
     #preview-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
     .preview-content { background: white; max-width: 800px; margin: auto; padding: 30px; border-radius: 12px; }
     
-    /* Photo centered in Preview */
     .preview-photo-wrap { display: flex; justify-content: center; margin-bottom: 20px; }
     .preview-photo { width: 140px; height: 160px; object-fit: cover; border-radius: 8px; border: 3px solid var(--primary); }
     
@@ -81,7 +83,9 @@
   <div class="search-section" id="search-block">
     <h3>Find Patient</h3>
     <input type="text" id="searchInput" placeholder="Search Name, Reg No, or Barcode">
-    <input type="date" id="searchDate">
+    <div class="date-input-group">
+        <input type="date" id="searchDate">
+    </div>
     <div id="reader"></div>
     <button type="button" class="btn-scan" onclick="startScanner()">Open Barcode Scanner</button>
     <button type="button" class="btn-search" onclick="searchPatient()">Search Patient</button>
@@ -216,21 +220,23 @@
     const infoContainer = document.getElementById('p_info_details');
     infoContainer.innerHTML = "";
 
-    // ALL FIELDS INCLUDING NEXT OF KIN
+    // RESTORED ALL PATIENT FIELDS IN THE FORM
     const fields = [
       { label: "Patient Name", val: p.name },
       { label: "Registration No", val: p.regNumber },
-      { label: "Age/Sex", val: (p.age || '--') + " / " + (p.sex || '--') },
+      { label: "Age", val: p.age },
+      { label: "Sex", val: p.sex },
+      { label: "Race", val: p.race },
+      { label: "Religion", val: p.religion },
       { label: "Blood Group", val: p.bloodGroup },
+      { label: "Phone", val: p.phone },
+      { label: "Address", val: p.address },
       { label: "Next of Kin", val: p.nextOfKin },
-      { label: "Kin Phone", val: p.kinPhone },
-      { label: "Address", val: p.address }
+      { label: "Kin Phone", val: p.kinPhone }
     ];
 
     fields.forEach(f => {
-      if (f.val && f.val !== " / ") {
-        infoContainer.innerHTML += `<div class="info-row"><span class="info-label">${f.label}:</span><span class="info-value">${f.val}</span></div>`;
-      }
+      if (f.val) infoContainer.innerHTML += `<div class="info-row"><span class="info-label">${f.label}:</span><span class="info-value">${f.val}</span></div>`;
     });
   }
 
@@ -254,14 +260,15 @@
     const p = selectedPatient;
     document.getElementById('prev_p_photo').src = p.photo || '';
     
-    // Identification section in Preview
+    // RESTORED ALL FIELDS IN PREVIEW BELOW PHOTO
     document.getElementById('preview-id-section').innerHTML = `
       <div class="preview-row"><strong>Full Name:</strong> ${p.name}</div>
       <div class="preview-row"><strong>Registration:</strong> ${p.regNumber}</div>
       <div class="preview-row"><strong>Age/Sex:</strong> ${p.age || '--'} / ${p.sex || '--'} | <strong>Blood:</strong> ${p.bloodGroup || '--'}</div>
+      <div class="preview-row"><strong>Race/Religion:</strong> ${p.race || '--'} / ${p.religion || '--'}</div>
       <div class="preview-row"><strong>Next of Kin:</strong> ${p.nextOfKin || '--'} (${p.kinPhone || '--'})</div>
       <div class="preview-row"><strong>Address:</strong> ${p.address || '--'}</div>
-      <div class="preview-row"><strong>Visit Status:</strong> Visit #${p.currentVisitNo} on ${new Date().toLocaleDateString()}</div>
+      <div class="preview-row"><strong>Status:</strong> Visit #${p.currentVisitNo} | ${new Date().toLocaleString()}</div>
     `;
 
     let html = `
