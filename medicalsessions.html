@@ -10,20 +10,28 @@
     body { font-family: "Times New Roman", Times, serif; background: #fdfdfd; margin: 20px; color: var(--dark); }
     .container { max-width: 850px; margin: auto; background: white; padding: 30px; border: 1px solid var(--border); border-radius: 8px; }
     
-    /* Search Section (Identical to Edit Patient) */
+    /* Search Section */
     .search-section { background: #eef4ff; padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--primary); }
     h3 { text-align: center; margin-top: 0; }
     input, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 0.95em; }
+    
+    /* Date input label logic like edit_patient.html */
+    input[type="date"]::before {
+      content: "Search by Date: ";
+      color: #666;
+      margin-right: 5px;
+    }
+
     #reader { width: 100%; max-width: 400px; margin: 10px auto; border-radius: 8px; border: 2px solid var(--primary); display: none;}
     
     button { display: block; width: 100%; max-width: 450px; margin: 10px auto; padding: 10px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; color: white; transition: 0.2s; }
     .btn-search { background-color: var(--primary); }
     .btn-scan { background-color: #4CAF50; }
 
-    /* Results Table */
-    .results-section { display: none; margin-top: 20px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85em; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    /* Results Table - 11px to match edit_patient */
+    .results-section { display: none; margin-top: 20px; width: 100%; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; table-layout: fixed; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; white-space: nowrap; overflow: hidden; }
     th { background-color: var(--primary); color: white; }
     tr:hover { background: #ddecff; cursor: pointer; }
 
@@ -35,7 +43,7 @@
     .info-label { font-weight: bold; color: #555; }
     .info-value { color: #000; text-align: right; }
 
-    /* Grouped Shaded Boxes */
+    /* Shaded Boxes */
     .group-box { padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(0,0,0,0.05); }
     .history-box { background-color: #fef9e7; border-left: 6px solid #f1c40f; }
     .vitals-box { background-color: #e8f8f5; border-left: 6px solid #1abc9c; }
@@ -44,11 +52,13 @@
 
     .section-title { font-size: 1.2em; font-weight: bold; margin-bottom: 15px; color: var(--dark); text-transform: uppercase; }
     
-    /* Vitals Styling */
+    /* Vitals Styling with Labels */
     .vitals-grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-top: 10px; }
-    .vital-input-card { display: flex; align-items: center; background: white; border: 1px solid #ccc; padding: 8px 15px; border-radius: 8px; }
-    .vital-input-card input { border: none; width: 60px; margin: 0; padding: 0; text-align: center; font-weight: bold; font-size: 1.1em; outline: none; }
-    .vital-input-card span { font-size: 0.9em; color: #7f8c8d; margin-left: 8px; }
+    .vital-input-card { display: flex; flex-direction: column; align-items: center; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 8px; min-width: 100px; }
+    .vital-label { font-size: 0.8em; font-weight: bold; color: var(--dark); margin-bottom: 5px; }
+    .vital-row { display: flex; align-items: center; }
+    .vital-input-card input { border: none; width: 50px; text-align: center; font-weight: bold; font-size: 1.1em; outline: none; background: transparent; margin: 0; padding: 0; }
+    .vital-input-card span { font-size: 0.8em; color: #7f8c8d; margin-left: 5px; }
 
     .footer-btns { display: flex; gap: 15px; margin-top: 30px; }
     .btn-save { background: #2c3e50; }
@@ -65,13 +75,21 @@
   <div class="search-section" id="search-block">
     <h3>Find Patient</h3>
     <input type="text" id="searchInput" placeholder="Search Name or Reg No. or Barcode">
+    <input type="date" id="searchDate">
+    
     <div id="reader"></div>
     <button type="button" class="btn-scan" onclick="startScanner()">Open Barcode Scanner</button>
     <button type="button" class="btn-search" onclick="searchPatient()">Search Patient</button>
     
     <div id="resultsArea" class="results-section">
       <table>
-        <thead><tr><th>Name</th><th>Reg No</th><th>Visit Date</th></tr></thead>
+        <thead>
+            <tr>
+                <th style="width: 40%;">Name</th>
+                <th style="width: 30%;">Reg No</th>
+                <th style="width: 30%;">Visit Date</th>
+            </tr>
+        </thead>
         <tbody id="resultsBody"></tbody>
       </table>
     </div>
@@ -102,12 +120,26 @@
     <div class="group-box vitals-box">
       <div class="section-title" style="text-align:center;">Vital Signs</div>
       <div class="vitals-grid">
-        <div class="vital-input-card"><input type="number" id="v_temp"> <span>C°</span></div>
-        <div class="vital-input-card"><input type="number" id="v_hr"> <span>bpm</span></div>
-        <div class="vital-input-card"><input type="number" id="v_rr"> <span>bpm</span></div>
         <div class="vital-input-card">
-          <input type="number" id="v_bp_s" placeholder="Sys"> <span style="margin:0 5px;">/</span> 
-          <input type="number" id="v_bp_d" placeholder="Dia"> <span>mmHg</span>
+          <span class="vital-label">Temp</span>
+          <div class="vital-row"><input type="number" id="v_temp"> <span>C°</span></div>
+        </div>
+        <div class="vital-input-card">
+          <span class="vital-label">HR</span>
+          <div class="vital-row"><input type="number" id="v_hr"> <span>bpm</span></div>
+        </div>
+        <div class="vital-input-card">
+          <span class="vital-label">RR</span>
+          <div class="vital-row"><input type="number" id="v_rr"> <span>bpm</span></div>
+        </div>
+        <div class="vital-input-card">
+          <span class="vital-label">BP</span>
+          <div class="vital-row">
+            <input type="number" id="v_bp_s" placeholder="Sys" style="width:40px;"> 
+            <span style="margin:0 2px;">/</span> 
+            <input type="number" id="v_bp_d" placeholder="Dia" style="width:40px;"> 
+            <span>mmHg</span>
+          </div>
         </div>
       </div>
     </div>
@@ -121,9 +153,9 @@
       <div class="section-title">Investigations</div>
       <label>Important Notes</label>
       <textarea id="inv_notes" rows="6"></textarea>
-      <button type="button" class="btn-search" style="background:#e74c3c;" onclick="document.getElementById('fileInput').click()">Upload Files</button>
+      <button type="button" class="btn-search" style="background:#e74c3c; width: 100%;" onclick="document.getElementById('fileInput').click()">Upload Files</button>
       <input type="file" id="fileInput" hidden multiple accept="image/*,application/pdf" onchange="handleFiles(event)">
-      <div id="fileList" style="margin-top:10px; display:flex; gap:10px;"></div>
+      <div id="fileList" style="margin-top:10px; display:flex; gap:10px; flex-wrap: wrap;"></div>
     </div>
 
     <div class="footer-btns">
@@ -139,30 +171,39 @@
   let selectedPatient = null;
   let attachments = [];
 
-  // EXACT SEARCH FROM EDIT_PATIENT.HTML
   function searchPatient() {
     const textQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+    const dateQuery = document.getElementById('searchDate').value;
     const resultsBody = document.getElementById('resultsBody');
     const resultsArea = document.getElementById('resultsArea');
     resultsBody.innerHTML = ""; 
     document.getElementById('session-form').style.display = 'none';
 
-    if (!textQuery) return;
+    if (!textQuery && !dateQuery) return;
 
-    const matches = allPatients.filter(p => 
-      p.name.toLowerCase().includes(textQuery) || 
-      p.regNumber.toLowerCase().includes(textQuery)
-    );
+    const matches = allPatients.filter(p => {
+        const nameMatch = p.name.toLowerCase().includes(textQuery);
+        const regMatch = p.regNumber.toLowerCase().includes(textQuery);
+        const dateMatch = dateQuery ? (p.entryTime && p.entryTime.startsWith(dateQuery)) : true;
+        
+        if(textQuery && dateQuery) return (nameMatch || regMatch) && dateMatch;
+        if(textQuery) return (nameMatch || regMatch);
+        if(dateQuery) return dateMatch;
+        return false;
+    });
 
     if (matches.length > 0) {
       resultsArea.style.display = "block";
       matches.forEach(p => {
-        resultsBody.innerHTML += `<tr onclick='loadForm(${JSON.stringify(p)})'><td>${p.name}</td><td>${p.regNumber}</td><td>${(p.entryTime || '').split('T')[0]}</td></tr>`;
+        resultsBody.innerHTML += `<tr onclick='loadForm(${JSON.stringify(p)})'>
+            <td>${p.name}</td>
+            <td>${p.regNumber}</td>
+            <td>${(p.entryTime || '').split('T')[0]}</td>
+        </tr>`;
       });
     } else { alert("Not found."); }
   }
 
-  // EXACT SCANNER FROM EDIT_PATIENT.HTML
   function startScanner() {
     const readerElem = document.getElementById('reader');
     readerElem.style.display = 'block';
@@ -191,7 +232,6 @@
     const infoContainer = document.getElementById('p_info_details');
     infoContainer.innerHTML = "";
 
-    // Comprehensive list of fields from registration
     const fields = [
       { label: "Patient Name", val: p.name },
       { label: "Registration No", val: p.regNumber },
