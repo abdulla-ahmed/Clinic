@@ -172,6 +172,7 @@
   let allPatients = JSON.parse(localStorage.getItem('patients')) || [];
   let allSessions = JSON.parse(localStorage.getItem('sessions')) || [];
   let selectedPatient = null;
+  let currentVisitNumber = 1;
   let attachments = [];
 
   function searchPatient() {
@@ -206,8 +207,11 @@
     document.getElementById('search-block').style.display = 'none';
     document.getElementById('session-form').style.display = 'block';
     document.getElementById('p_photo').src = p.photo || '';
-    const visitNo = allSessions.filter(s => s.regNumber === p.regNumber).length + 1;
-    document.getElementById('visitDisplay').innerText = "VISIT NO: " + visitNo;
+    
+    // Visit Counter Logic
+    const previousVisitsCount = allSessions.filter(s => s.regNumber === p.regNumber).length;
+    currentVisitNumber = previousVisitsCount + 1;
+    document.getElementById('visitDisplay').innerText = "VISIT NO: " + currentVisitNumber;
 
     const fields = [
       { l: "Name:", v: p.name }, { l: "Reg. No.:", v: p.regNumber },
@@ -234,20 +238,16 @@
   function generatePreview() {
     const p = selectedPatient;
     document.getElementById('prev_p_photo').src = p.photo || '';
-    
-    // Patient Info Mirror
     const fields = [
       { l: "Full Name:", v: p.name }, { l: "Reg. No.:", v: p.regNumber },
-      { l: "Age/Sex:", v: p.age + "/" + p.sex }, { l: "Patient Tele:", v: p.phone || '--' },
-      { l: "Address:", v: p.address || '--' }, { l: "Kin Name:", v: p.nextOfKin || '--' },
-      { l: "Kin Tele:", v: p.kinPhone || '--' }, { l: "Kin Address:", v: p.kinAddress || '--' }
+      { l: "Visit Info:", v: "Visit #" + currentVisitNumber },
+      { l: "Patient Tele:", v: p.phone || '--' }, { l: "Address:", v: p.address || '--' },
+      { l: "Kin Name:", v: p.nextOfKin || '--' }, { l: "Kin Tele:", v: p.kinPhone || '--' },
+      { l: "Kin Address:", v: p.kinAddress || '--' }
     ];
     document.getElementById('prev_info_details').innerHTML = fields.map(f => `<div class="info-row"><span class="info-label">${f.l}</span><span class="info-value">${f.v}</span></div>`).join('');
-
-    // Vitals Mirror
     document.getElementById('prev_vitals').innerText = `T: ${document.getElementById('v_temp').value}°C | HR: ${document.getElementById('v_hr').value} | RR: ${document.getElementById('v_rr').value} | BP: ${document.getElementById('v_bp_s').value}/${document.getElementById('v_bp_d').value} mmHg`;
 
-    // History Only Mirror
     const historySections = [
       { l: "Chief Complain", id: "h_chief" }, { l: "Present Illness", id: "h_illness" },
       { l: "ROS", id: "h_ros" }, { l: "Past Medical", id: "h_past_med" },
@@ -260,20 +260,36 @@
         if(val) histHtml += `<div style="font-weight:bold; font-size:0.85em; margin-top:5px;">${s.l}:</div><div class="preview-data-box">${val}</div>`;
     });
     document.getElementById('prev_history_only').innerHTML = histHtml;
-
-    // Physical Exam Separated Mirror
     document.getElementById('prev_exam_only').innerText = document.getElementById('exam_details').value || "No examination recorded.";
-
     document.getElementById('prev_inv_box').innerText = document.getElementById('inv_notes').value || "No clinical notes.";
     document.getElementById('prev_file_mark').innerHTML = attachments.length > 0 ? `<div class="attachment-indicator">📎 Files Attached: ${attachments.length}</div>` : "";
-
     document.getElementById('preview-overlay').style.display = 'block';
   }
 
   function closePreview() { document.getElementById('preview-overlay').style.display = 'none'; }
 
   function finalSaveSession() {
-    alert("Medical Visit Saved Successfully!");
+    if (!selectedPatient) return;
+    const newSession = {
+        regNumber: selectedPatient.regNumber,
+        visitNo: currentVisitNumber,
+        date: new Date().toISOString(),
+        vitals: {
+            temp: document.getElementById('v_temp').value,
+            hr: document.getElementById('v_hr').value,
+            rr: document.getElementById('v_rr').value,
+            bp: document.getElementById('v_bp_s').value + "/" + document.getElementById('v_bp_d').value
+        },
+        history: {
+            chief: document.getElementById('h_chief').value,
+            illness: document.getElementById('h_illness').value,
+            exam: document.getElementById('exam_details').value,
+            notes: document.getElementById('inv_notes').value
+        }
+    };
+    allSessions.push(newSession);
+    localStorage.setItem('sessions', JSON.stringify(allSessions));
+    alert("Visit #" + currentVisitNumber + " Saved!");
     location.href = 'mainpage.html';
   }
 </script>
