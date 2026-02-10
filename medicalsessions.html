@@ -41,7 +41,7 @@
     .bp-box { width: 50px; font-weight: normal; font-size: 0.9em; } 
     .unit-label { font-size: 0.9em; color: #666; }
 
-    /* Boxes */
+    /* Group Boxes */
     .group-box { padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(0,0,0,0.05); }
     .history-box { background-color: #fef9e7; border-left: 6px solid #f1c40f; }
     .vitals-box { background-color: #e8f8f5; border-left: 6px solid #1abc9c; }
@@ -129,7 +129,8 @@
       <textarea id="inv_notes" rows="4"></textarea>
       <button type="button" style="background:#e74c3c; width: 100%;" onclick="document.getElementById('fileInput').click()">Upload Files</button>
       <input type="file" id="fileInput" hidden multiple onchange="handleFiles(event)">
-      <div id="fileList"></div> </div>
+      <div id="fileList"></div>
+    </div>
 
     <div class="footer-btns">
       <button style="background: var(--dark);" onclick="generatePreview()">Preview Session</button>
@@ -150,8 +151,11 @@
     <div class="preview-section-title">VITAL SIGNS</div>
     <div id="prev_vitals" class="preview-data-box"></div>
 
-    <div class="preview-section-title">CLINICAL HISTORY & PHYSICAL EXAM</div>
-    <div id="prev_history_all"></div>
+    <div class="preview-section-title">CLINICAL HISTORY</div>
+    <div id="prev_history_only"></div>
+
+    <div class="preview-section-title">PHYSICAL EXAMINATION</div>
+    <div id="prev_exam_only" class="preview-data-box"></div>
 
     <div class="preview-section-title">INVESTIGATIONS & ATTACHMENTS</div>
     <div id="prev_inv_box" class="preview-data-box"></div>
@@ -175,20 +179,17 @@
     const dateQuery = document.getElementById('searchDate').value;
     const body = document.getElementById('resultsBody');
     body.innerHTML = "";
-    
     const matches = allPatients.filter(p => {
         const nMatch = p.name.toLowerCase().includes(text) || p.regNumber.includes(text);
         const dMatch = dateQuery ? (p.entryTime && p.entryTime.includes(dateQuery)) : true;
         return nMatch && dMatch;
     });
-
     if (matches.length > 0) {
       document.getElementById('resultsArea').style.display = "block";
       matches.forEach(p => {
-        const entryDate = p.entryTime ? p.entryTime.split('T')[0] : '--';
-        body.innerHTML += `<tr onclick='loadForm(${JSON.stringify(p)})'><td>${p.name}</td><td>${p.regNumber}</td><td>${entryDate}</td></tr>`;
+        body.innerHTML += `<tr onclick='loadForm(${JSON.stringify(p)})'><td>${p.name}</td><td>${p.regNumber}</td><td>${p.entryTime ? p.entryTime.split('T')[0] : '--'}</td></tr>`;
       });
-    } else { alert("Patient not found"); }
+    } else { alert("Not found"); }
   }
 
   function startScanner() {
@@ -205,11 +206,9 @@
     document.getElementById('search-block').style.display = 'none';
     document.getElementById('session-form').style.display = 'block';
     document.getElementById('p_photo').src = p.photo || '';
-    
     const visitNo = allSessions.filter(s => s.regNumber === p.regNumber).length + 1;
     document.getElementById('visitDisplay').innerText = "VISIT NO: " + visitNo;
 
-    // Loading EVERY field from patient profile
     const fields = [
       { l: "Name:", v: p.name }, { l: "Reg. No.:", v: p.regNumber },
       { l: "Age:", v: p.age }, { l: "Sex:", v: p.sex },
@@ -236,32 +235,34 @@
     const p = selectedPatient;
     document.getElementById('prev_p_photo').src = p.photo || '';
     
-    // Comprehensive Mirror for Preview
+    // Patient Info Mirror
     const fields = [
       { l: "Full Name:", v: p.name }, { l: "Reg. No.:", v: p.regNumber },
       { l: "Age/Sex:", v: p.age + "/" + p.sex }, { l: "Patient Tele:", v: p.phone || '--' },
-      { l: "Address:", v: p.address || '--' }, { l: "Occupation:", v: p.occupation || '--' },
-      { l: "Next of Kin:", v: p.nextOfKin || '--' }, { l: "Kin Phone:", v: p.kinPhone || '--' },
-      { l: "Kin Address:", v: p.kinAddress || '--' }
+      { l: "Address:", v: p.address || '--' }, { l: "Kin Name:", v: p.nextOfKin || '--' },
+      { l: "Kin Tele:", v: p.kinPhone || '--' }, { l: "Kin Address:", v: p.kinAddress || '--' }
     ];
     document.getElementById('prev_info_details').innerHTML = fields.map(f => `<div class="info-row"><span class="info-label">${f.l}</span><span class="info-value">${f.v}</span></div>`).join('');
 
     // Vitals Mirror
     document.getElementById('prev_vitals').innerText = `T: ${document.getElementById('v_temp').value}°C | HR: ${document.getElementById('v_hr').value} | RR: ${document.getElementById('v_rr').value} | BP: ${document.getElementById('v_bp_s').value}/${document.getElementById('v_bp_d').value} mmHg`;
 
-    // History and Exam Mirror
+    // History Only Mirror
     const historySections = [
       { l: "Chief Complain", id: "h_chief" }, { l: "Present Illness", id: "h_illness" },
       { l: "ROS", id: "h_ros" }, { l: "Past Medical", id: "h_past_med" },
       { l: "Past Surgical", id: "h_past_surg" }, { l: "Drugs/Allergies", id: "h_drugs" },
-      { l: "Examination", id: "exam_details" }
+      { l: "Family History", id: "h_family" }, { l: "Social History", id: "h_social" }
     ];
     let histHtml = "";
     historySections.forEach(s => {
         const val = document.getElementById(s.id).value;
         if(val) histHtml += `<div style="font-weight:bold; font-size:0.85em; margin-top:5px;">${s.l}:</div><div class="preview-data-box">${val}</div>`;
     });
-    document.getElementById('prev_history_all').innerHTML = histHtml;
+    document.getElementById('prev_history_only').innerHTML = histHtml;
+
+    // Physical Exam Separated Mirror
+    document.getElementById('prev_exam_only').innerText = document.getElementById('exam_details').value || "No examination recorded.";
 
     document.getElementById('prev_inv_box').innerText = document.getElementById('inv_notes').value || "No clinical notes.";
     document.getElementById('prev_file_mark').innerHTML = attachments.length > 0 ? `<div class="attachment-indicator">📎 Files Attached: ${attachments.length}</div>` : "";
