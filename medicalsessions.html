@@ -15,7 +15,7 @@
     h3 { text-align: center; margin-top: 0; }
     input, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 0.95em; }
     
-    /* Date input label logic like edit_patient.html */
+    /* Date input label logic from edit_patient.html */
     input[type="date"]::before {
       content: "Search by Date: ";
       color: #666;
@@ -28,7 +28,7 @@
     .btn-search { background-color: var(--primary); }
     .btn-scan { background-color: #4CAF50; }
 
-    /* Results Table - 11px to match edit_patient */
+    /* Results Table */
     .results-section { display: none; margin-top: 20px; width: 100%; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; table-layout: fixed; }
     th, td { border: 1px solid #ddd; padding: 8px; text-align: left; white-space: nowrap; overflow: hidden; }
@@ -52,13 +52,13 @@
 
     .section-title { font-size: 1.2em; font-weight: bold; margin-bottom: 15px; color: var(--dark); text-transform: uppercase; }
     
-    /* Vitals Styling with Labels */
-    .vitals-grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-top: 10px; }
-    .vital-input-card { display: flex; flex-direction: column; align-items: center; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 8px; min-width: 100px; }
-    .vital-label { font-size: 0.8em; font-weight: bold; color: var(--dark); margin-bottom: 5px; }
-    .vital-row { display: flex; align-items: center; }
-    .vital-input-card input { border: none; width: 50px; text-align: center; font-weight: bold; font-size: 1.1em; outline: none; background: transparent; margin: 0; padding: 0; }
-    .vital-input-card span { font-size: 0.8em; color: #7f8c8d; margin-left: 5px; }
+    /* Vitals Styling with External Labels */
+    .vitals-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-top: 10px; }
+    .vital-item { display: flex; flex-direction: column; align-items: flex-start; }
+    .vital-item label { font-weight: bold; font-size: 0.9em; margin-bottom: 4px; color: #333; }
+    .vital-input-card { display: flex; align-items: center; background: white; border: 1px solid #ccc; padding: 5px 10px; border-radius: 8px; height: 40px; }
+    .vital-input-card input { border: none; width: 50px; text-align: center; font-weight: bold; font-size: 1em; outline: none; background: transparent; margin: 0; padding: 0; }
+    .vital-input-card span { font-size: 0.85em; color: #7f8c8d; margin-left: 5px; }
 
     .footer-btns { display: flex; gap: 15px; margin-top: 30px; }
     .btn-save { background: #2c3e50; }
@@ -120,21 +120,30 @@
     <div class="group-box vitals-box">
       <div class="section-title" style="text-align:center;">Vital Signs</div>
       <div class="vitals-grid">
-        <div class="vital-input-card">
-          <span class="vital-label">Temp</span>
-          <div class="vital-row"><input type="number" id="v_temp"> <span>C°</span></div>
+        <div class="vital-item">
+          <label>Temp.</label>
+          <div class="vital-input-card">
+            <input type="number" id="v_temp"> <span>C°</span>
+          </div>
         </div>
-        <div class="vital-input-card">
-          <span class="vital-label">HR</span>
-          <div class="vital-row"><input type="number" id="v_hr"> <span>bpm</span></div>
+        
+        <div class="vital-item">
+          <label>HR</label>
+          <div class="vital-input-card">
+            <input type="number" id="v_hr"> <span>bpm</span>
+          </div>
         </div>
-        <div class="vital-input-card">
-          <span class="vital-label">RR</span>
-          <div class="vital-row"><input type="number" id="v_rr"> <span>bpm</span></div>
+
+        <div class="vital-item">
+          <label>RR</label>
+          <div class="vital-input-card">
+            <input type="number" id="v_rr"> <span>bpm</span>
+          </div>
         </div>
-        <div class="vital-input-card">
-          <span class="vital-label">BP</span>
-          <div class="vital-row">
+
+        <div class="vital-item">
+          <label>BP</label>
+          <div class="vital-input-card">
             <input type="number" id="v_bp_s" placeholder="Sys" style="width:40px;"> 
             <span style="margin:0 2px;">/</span> 
             <input type="number" id="v_bp_d" placeholder="Dia" style="width:40px;"> 
