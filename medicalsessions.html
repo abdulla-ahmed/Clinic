@@ -214,11 +214,16 @@
 
     // Load Patient Info EXACTLY as requested
     const fields = [
-      { l: "Name:", v: p.name }, { l: "Reg. No.:", v: p.regNumber },
-      { l: "Age:", v: p.age }, { l: "Sex:", v: p.sex },
-      { l: "Tele:", v: p.phone || '--' }, { l: "Address:", v: p.address || '--' },
-      { l: "Race/Rel:", v: (p.race || '--') + " / " + (p.religion || '--') },
+      { l: "Name:", v: p.name }, 
+      { l: "Reg. No.:", v: p.regNumber },
+      { l: "Age:", v: p.age }, 
+      { l: "Sex:", v: p.sex },
+      { l: "Race:", v: p.race || '--'},
+      { l: "Rel:", v: p.religion || '--' },
       { l: "Occupation:", v: p.occupation || '--' },
+      { l: "Tele:", v: p.phone || '--' }, 
+      { l: "Address:", v: p.address || '--' },
+      { l: "Email", v: p.email || '--' }, 
       { l: "Kin Name:", v: p.kinName || '--' }, 
       { l: "Kin Phone:", v: p.kinPhone || '--' },
       { l: "Kin Add:", v: p.kinAddress || '--' }
@@ -242,15 +247,20 @@
     
     // EXACT MIRROR of the info page fields (11 items total)
     const fields = [
-      { l: "Name:", v: p.name }, { l: "Reg. No.:", v: p.regNumber },
-      { l: "Age:", v: p.age }, { l: "Sex:", v: p.sex },
-      { l: "Tele:", v: p.phone || '--' }, { l: "Address:", v: p.address || '--' },
-      { l: "Race/Rel:", v: (p.race || '--') + " / " + (p.religion || '--') },
+      { l: "Name:", v: p.name }, 
+      { l: "Reg. No.:", v: p.regNumber },
+      { l: "Age:", v: p.age }, 
+      { l: "Sex:", v: p.sex },
+      { l: "Race:", v: p.race || '--'},
+      { l: "Rel:", v: p.religion || '--' },
       { l: "Occupation:", v: p.occupation || '--' },
+      { l: "Tele:", v: p.phone || '--' }, 
+      { l: "Address:", v: p.address || '--' },
+      { l: "Email", v: p.email || '--' }, 
       { l: "Kin Name:", v: p.kinName || '--' }, 
       { l: "Kin Phone:", v: p.kinPhone || '--' },
       { l: "Kin Add:", v: p.kinAddress || '--' }
-    ];
+ ];
     document.getElementById('prev_info_details').innerHTML = fields.map(f => `<div class="info-row"><span class="info-label">${f.l}</span><span class="info-value">${f.v}</span></div>`).join('');
 
     // Vitals Mirror
@@ -314,4 +324,5 @@
 </script>
 </body>
 </html>
+
 
