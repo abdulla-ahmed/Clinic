@@ -4,193 +4,219 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Medical Session - Al-Kawaz Clinic</title>
+  <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
     :root { --primary: #6698fd; --secondary: #3376fe; --bg: #f4f7f6; }
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
-    .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+    body { font-family: "Times New Roman", Times, serif; background: var(--bg); margin: 20px; }
+    .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
     
+    /* Search Section Styling (Matching your other pages) */
+    .search-section { background: #eef4ff; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--primary); }
+    h1, h2, h3 { text-align: center; color: #333; }
+    input, textarea, button { display: block; width: 100%; max-width: 500px; margin: 10px auto; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; }
+    
+    button { color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
+    .btn-search { background-color: var(--primary); }
+    .btn-camera { background-color: #4CAF50; }
+    .btn-save { background-color: #4CAF50; font-size: 1.1em; }
+    .btn-cancel { background-color: #9e9e9e; }
+    
+    #reader { width: 100%; max-width: 400px; margin: 10px auto; border-radius: 8px; border: 2px solid var(--primary); display: none;}
+
+    /* Results Table */
+    #resultsArea { display: none; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+    th { background-color: var(--primary); color: white; }
+    tr:hover { background: #ddecff; cursor: pointer; }
+
     /* Patient Header Card */
-    .patient-card { display: flex; align-items: center; background: #eef4ff; padding: 15px; border-radius: 12px; margin-bottom: 25px; border-left: 5px solid var(--primary); }
-    .patient-card img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-right: 20px; border: 2px solid white; }
-    .patient-info h2 { margin: 0; color: var(--secondary); }
-    .visit-badge { margin-left: auto; background: var(--secondary); color: white; padding: 10px 20px; border-radius: 30px; font-weight: bold; }
+    .patient-card { display: flex; align-items: center; background: #f0f7ff; padding: 20px; border-radius: 12px; margin-bottom: 25px; border-left: 6px solid var(--secondary); }
+    .patient-card img { width: 90px; height: 90px; border-radius: 10px; object-fit: cover; margin-right: 20px; border: 2px solid white; }
+    .visit-badge { margin-left: auto; background: var(--secondary); color: white; padding: 12px 25px; border-radius: 50px; font-weight: bold; font-size: 1.2em; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
-    /* Forms */
-    h3 { border-bottom: 2px solid var(--primary); padding-bottom: 5px; color: #444; margin-top: 30px; }
-    .grid-vitals { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; background: #f9f9f9; padding: 15px; border-radius: 10px; }
-    .vital-item { display: flex; flex-direction: column; }
-    .vital-item label { font-size: 0.85em; font-weight: bold; margin-bottom: 5px; }
-    .vital-input-wrap { display: flex; align-items: center; background: white; border: 1px solid #ccc; border-radius: 5px; padding: 2px 5px; }
-    .vital-input-wrap input { border: none; width: 50px; padding: 8px; outline: none; text-align: center; }
-    .bp-wrap { display: flex; align-items: center; }
-
-    textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; resize: vertical; margin-bottom: 10px; }
-    
-    .btn { padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; color: white; }
-    .btn-save { background: #4CAF50; width: 100%; margin-top: 20px; font-size: 1.1em; }
-    .btn-upload { background: #ff9800; margin-bottom: 10px; }
-    .btn-cancel { background: #9e9e9e; margin-top: 10px; width: 100%; }
-    
-    .investigation-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
-    .file-preview { width: 100px; height: 100px; border: 1px solid #ddd; object-fit: cover; border-radius: 5px; }
-    
-    .search-section { background: #fff; padding: 20px; border-radius: 12px; border: 2px dashed var(--primary); margin-bottom: 20px; }
+    /* Session Form Sections */
     #session-form { display: none; }
+    .section-title { background: #eee; padding: 8px; border-radius: 5px; font-weight: bold; margin-top: 25px; border-left: 4px solid var(--secondary); }
+    
+    /* Vitals Styling */
+    .vitals-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; background: #fafafa; padding: 15px; border-radius: 10px; border: 1px solid #eee; }
+    .vital-box { display: flex; align-items: center; background: white; border: 1px solid #ccc; padding: 5px 10px; border-radius: 5px; }
+    .vital-box input { border: none; width: 60px; margin: 0; padding: 5px; text-align: center; font-weight: bold; }
+    .vital-box span { font-size: 0.85em; color: #666; margin-left: 5px; }
+
+    .investigation-preview { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+    .file-thumb { width: 80px; height: 80px; border-radius: 5px; border: 1px solid #ddd; object-fit: cover; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <div id="search-area" class="search-section">
-    <h2 style="text-align:center;">Find Patient for New Session</h2>
-    <input type="text" id="searchInput" placeholder="Search Name or Reg No..." style="width:100%; padding:12px; margin-bottom:10px; border-radius:8px; border:1px solid #ccc;">
-    <button class="btn" style="background:var(--primary); width:100%;" onclick="searchPatient()">Search Patient</button>
-    <div id="resultsArea" style="margin-top:15px;"></div>
+  <h1>Medical Session</h1>
+
+  <div class="search-section" id="search-block">
+    <h3>Find Patient</h3>
+    <input type="text" id="searchInput" placeholder="Search Name, Reg No, or Scan Barcode">
+    <div id="reader"></div>
+    <button class="btn-camera" onclick="startScanner()">Open Barcode Scanner</button>
+    <button class="btn-search" onclick="searchPatient()">Search Patient</button>
+    
+    <div id="resultsArea">
+      <table>
+        <thead><tr><th>Name</th><th>Reg No</th></tr></thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+    </div>
   </div>
 
   <div id="session-form">
-    <div class="patient-card" id="patient-header">
-      </div>
+    <div class="patient-card" id="patientHeader"></div>
 
-    <h3>Patient History</h3>
+    <div class="section-title">PATIENT HISTORY</div>
+    
     <label>Chief Complain (*)</label>
-    <textarea id="chiefComplain" rows="3" placeholder="50 words..."></textarea>
+    <textarea id="h_chief" rows="3"></textarea>
     
     <label>Present Illness (***)</label>
-    <textarea id="presentIllness" rows="8" placeholder="150 words..."></textarea>
+    <textarea id="h_illness" rows="9"></textarea>
     
     <label>Review of Systems (**)</label>
-    <textarea id="ros" rows="5" placeholder="100 words..."></textarea>
+    <textarea id="h_ros" rows="6"></textarea>
 
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-        <div><label>Past-Medical (*)</label><textarea id="pastMedical" rows="3"></textarea></div>
-        <div><label>Past-Surgical (*)</label><textarea id="pastSurgical" rows="3"></textarea></div>
+    <div style="display:flex; gap:10px;">
+      <div style="flex:1;"><label>Past-Medical (*)</label><textarea id="h_past_med" rows="3"></textarea></div>
+      <div style="flex:1;"><label>Past-Surgical (*)</label><textarea id="h_past_surg" rows="3"></textarea></div>
     </div>
 
     <label>Drug History (**)</label>
-    <textarea id="drugHistory" rows="5"></textarea>
+    <textarea id="h_drugs" rows="6"></textarea>
 
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-        <div><label>Allergies (*)</label><textarea id="allergies" rows="3"></textarea></div>
-        <div><label>Blood Transfusion (*)</label><textarea id="bloodTransfusion" rows="3"></textarea></div>
+    <div style="display:flex; gap:10px;">
+      <div style="flex:1;"><label>Allergies (*)</label><textarea id="h_allergies" rows="3"></textarea></div>
+      <div style="flex:1;"><label>Blood Transfusion (*)</label><textarea id="h_blood" rows="3"></textarea></div>
     </div>
 
     <label>Family History (*)</label>
-    <textarea id="familyHistory" rows="3"></textarea>
+    <textarea id="h_family" rows="3"></textarea>
     
     <label>Social History (**)</label>
-    <textarea id="socialHistory" rows="5"></textarea>
+    <textarea id="h_social" rows="6"></textarea>
 
-    <h3>Medical Examination</h3>
-    <p><strong>Vital Signs</strong></p>
-    <div class="grid-vitals">
-      <div class="vital-item">
-        <label>Temp</label>
-        <div class="vital-input-wrap"><input type="number" id="v_temp"> <span>C°</span></div>
+    <div class="section-title">MEDICAL EXAMINATION</div>
+    <p style="text-align:center; font-weight:bold; margin: 10px 0 5px 0;">Vital Signs</p>
+    
+    <div class="vitals-container">
+      <div class="vital-box">
+        <input type="number" id="v_temp" placeholder="Temp"> <span>C°</span>
       </div>
-      <div class="vital-item">
-        <label>Heart Rate</label>
-        <div class="vital-input-wrap"><input type="number" id="v_hr"> <span>bpm</span></div>
+      <div class="vital-box">
+        <input type="number" id="v_hr" placeholder="HR"> <span>bpm</span>
       </div>
-      <div class="vital-item">
-        <label>Resp. Rate</label>
-        <div class="vital-input-wrap"><input type="number" id="v_rr"> <span>bpm</span></div>
+      <div class="vital-box">
+        <input type="number" id="v_rr" placeholder="RR"> <span>bpm</span>
       </div>
-      <div class="vital-item">
-        <label>Blood Pressure</label>
-        <div class="bp-wrap">
-            <div class="vital-input-wrap"><input type="number" id="v_bp_s"></div>
-            <span style="padding:0 5px;">/</span>
-            <div class="vital-input-wrap"><input type="number" id="v_bp_d"></div>
-            <span style="font-size: 0.7em; margin-left:5px;">mmHg</span>
-        </div>
+      <div class="vital-box">
+        <input type="number" id="v_bp_s" placeholder="Sys"> <span>/</span> 
+        <input type="number" id="v_bp_d" placeholder="Dia"> <span>mmHg</span>
       </div>
     </div>
 
-    <h3>Examination</h3>
-    <textarea id="physExamination" rows="10" placeholder="Examination Details (****)"></textarea>
+    <div class="section-title">EXAMINATION</div>
+    <textarea id="exam_details" rows="12" placeholder="Details (****)"></textarea>
 
-    <h3>Investigations</h3>
+    <div class="section-title">INVESTIGATIONS</div>
     <label>Important Notes (***)</label>
-    <textarea id="investigationNotes" rows="8"></textarea>
+    <textarea id="inv_notes" rows="9"></textarea>
     
-    <button type="button" class="btn btn-upload" onclick="document.getElementById('fileInput').click()">+ Upload Investigation (PDF/Image)</button>
-    <input type="file" id="fileInput" hidden multiple accept="image/*,application/pdf" onchange="handleFileUploads(event)">
-    <div class="investigation-list" id="filePreviewContainer"></div>
+    <button type="button" class="btn-camera" onclick="document.getElementById('fileInput').click()">+ Upload Investigation</button>
+    <input type="file" id="fileInput" hidden multiple accept="image/*,application/pdf" onchange="handleFiles(event)">
+    <div class="investigation-preview" id="fileList"></div>
 
-    <button class="btn btn-save" onclick="saveSession()">Save & Preview Session</button>
-    <button class="btn btn-cancel" onclick="window.location.href='mainpage.html'">Cancel</button>
+    <button class="btn-save" onclick="saveSession()">Save & Preview Session</button>
+    <button class="btn-cancel" onclick="location.href='mainpage.html'">Cancel</button>
   </div>
 </div>
 
 <script>
   let allPatients = JSON.parse(localStorage.getItem('patients')) || [];
   let allSessions = JSON.parse(localStorage.getItem('sessions')) || [];
-  let currentPatient = null;
-  let investigationFiles = [];
+  let selectedPatient = null;
+  let uploadData = [];
 
   function searchPatient() {
-    const query = document.getElementById('searchInput').value.toLowerCase();
-    const results = allPatients.filter(p => p.name.toLowerCase().includes(query) || p.regNumber.includes(query));
-    const container = document.getElementById('resultsArea');
-    container.innerHTML = results.map(p => `
-      <div onclick="selectPatient('${p.regNumber}')" style="padding:10px; background:#f0f0f0; margin-bottom:5px; border-radius:5px; cursor:pointer;">
-        ${p.name} (${p.regNumber})
-      </div>
-    `).join('');
+    const query = document.getElementById('searchInput').value.toLowerCase().trim();
+    if(!query) return;
+
+    const matches = allPatients.filter(p => 
+      p.name.toLowerCase().includes(query) || 
+      p.regNumber.toLowerCase().includes(query)
+    );
+
+    const body = document.getElementById('resultsBody');
+    body.innerHTML = "";
+    if(matches.length > 0) {
+      document.getElementById('resultsArea').style.display = "block";
+      matches.forEach(p => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${p.name}</td><td>${p.regNumber}</td>`;
+        row.onclick = () => loadSessionForm(p);
+        body.appendChild(row);
+      });
+    } else { alert("Patient not found."); }
   }
 
-  function selectPatient(regNum) {
-    currentPatient = allPatients.find(p => p.regNumber === regNum);
-    document.getElementById('search-area').style.display = 'none';
+  function loadSessionForm(patient) {
+    selectedPatient = patient;
+    document.getElementById('search-block').style.display = 'none';
     document.getElementById('session-form').style.display = 'block';
-    
-    // Calculate Visit Number
-    const previousVisits = allSessions.filter(s => s.regNumber === regNum).length;
-    const currentVisitNo = previousVisits + 1;
 
-    document.getElementById('patient-header').innerHTML = `
-      <img src="${currentPatient.photo || 'https://via.placeholder.com/80'}" alt="Photo">
-      <div class="patient-info">
-        <h2>${currentPatient.name}</h2>
-        <small>Reg: ${currentPatient.regNumber} | Age: ${currentPatient.age}</small>
+    // Count previous visits for this specific patient
+    const visitCount = allSessions.filter(s => s.regNumber === patient.regNumber).length;
+    const nextVisit = visitCount + 1;
+
+    document.getElementById('patientHeader').innerHTML = `
+      <img src="${patient.photo || '#'}" alt="Patient">
+      <div>
+        <h2 style="margin:0;">${patient.name}</h2>
+        <p style="margin:0; color:#666;">ID: ${patient.regNumber} | Age: ${patient.age}</p>
       </div>
-      <div class="visit-badge">Visit No. ${currentVisitNo}</div>
+      <div class="visit-badge">Visit ${nextVisit}</div>
     `;
-    currentPatient.currentVisitNo = currentVisitNo;
+    selectedPatient.visitNumber = nextVisit;
   }
 
-  function handleFileUploads(e) {
+  function handleFiles(e) {
     const files = Array.from(e.target.files);
     files.forEach(file => {
       const reader = new FileReader();
       reader.onload = (event) => {
-        investigationFiles.push(event.target.result);
+        uploadData.push(event.target.result);
         const img = document.createElement('img');
-        img.src = file.type === 'application/pdf' ? 'https://cdn-icons-png.flaticon.com/512/337/337946.png' : event.target.result;
-        img.className = 'file-preview';
-        document.getElementById('filePreviewContainer').appendChild(img);
+        img.src = file.type.includes('pdf') ? 'https://cdn-icons-png.flaticon.com/512/337/337946.png' : event.target.result;
+        img.className = 'file-thumb';
+        document.getElementById('fileList').appendChild(img);
       };
       reader.readAsDataURL(file);
     });
   }
 
   function saveSession() {
-    const sessionData = {
-      regNumber: currentPatient.regNumber,
-      visitNo: currentPatient.currentVisitNo,
-      date: new Date().toLocaleDateString(),
+    const sessionRecord = {
+      regNumber: selectedPatient.regNumber,
+      patientName: selectedPatient.name,
+      visitNo: selectedPatient.visitNumber,
+      sessionDate: new Date().toLocaleString(),
       history: {
-        chief: document.getElementById('chiefComplain').value,
-        illness: document.getElementById('presentIllness').value,
-        ros: document.getElementById('ros').value,
-        pastMed: document.getElementById('pastMedical').value,
-        pastSurg: document.getElementById('pastSurgical').value,
-        drugs: document.getElementById('drugHistory').value,
-        allergies: document.getElementById('allergies').value,
-        blood: document.getElementById('bloodTransfusion').value,
-        family: document.getElementById('familyHistory').value,
-        social: document.getElementById('socialHistory').value
+        chief: document.getElementById('h_chief').value,
+        illness: document.getElementById('h_illness').value,
+        ros: document.getElementById('h_ros').value,
+        pastMed: document.getElementById('h_past_med').value,
+        pastSurg: document.getElementById('h_past_surg').value,
+        drugs: document.getElementById('h_drugs').value,
+        allergies: document.getElementById('h_allergies').value,
+        blood: document.getElementById('h_blood').value,
+        family: document.getElementById('h_family').value,
+        social: document.getElementById('h_social').value
       },
       vitals: {
         temp: document.getElementById('v_temp').value + " C°",
@@ -198,17 +224,30 @@
         rr: document.getElementById('v_rr').value + " bpm",
         bp: document.getElementById('v_bp_s').value + "/" + document.getElementById('v_bp_d').value + " mmHg"
       },
-      examination: document.getElementById('physExamination').value,
-      notes: document.getElementById('investigationNotes').value,
-      files: investigationFiles
+      exam: document.getElementById('exam_details').value,
+      notes: document.getElementById('inv_notes').value,
+      attachments: uploadData
     };
 
-    allSessions.push(sessionData);
+    allSessions.push(sessionRecord);
     localStorage.setItem('sessions', JSON.stringify(allSessions));
+    alert("Session " + selectedPatient.visitNumber + " Saved!");
     
-    alert("Session Saved Successfully!");
-    // In a real app, you would redirect to a preview/print page here
-    location.reload(); 
+    // Redirect logic
+    location.href = 'mainpage.html';
+  }
+
+  function startScanner() {
+    const readerElem = document.getElementById('reader');
+    readerElem.style.display = 'block';
+    const html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, (text) => {
+      document.getElementById('searchInput').value = text;
+      html5QrCode.stop().then(() => {
+        readerElem.style.display = 'none';
+        searchPatient();
+      });
+    }).catch(err => alert("Camera Error"));
   }
 </script>
 
