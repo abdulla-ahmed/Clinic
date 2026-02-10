@@ -44,12 +44,13 @@
     .inv-box { background-color: #fdf2f2; border-left: 6px solid #e74c3c; }
     .section-title { font-size: 1.2em; font-weight: bold; margin-bottom: 15px; color: var(--dark); text-transform: uppercase; }
     
-    /* Vitals */
+    /* Vitals Styling - Sys/Dia Smaller & Not Bold */
     .vitals-grid { display: flex; flex-wrap: wrap; gap: 20px; }
     .vital-item { display: flex; align-items: center; }
     .vital-item label { width: 50px; } 
     .vital-input-card { display: flex; align-items: center; background: white; border: 1px solid #ccc; padding: 5px 12px; border-radius: 8px; }
     .vital-input-card input { border: none; width: 50px; text-align: center; font-weight: bold; }
+    .bp-input { width: 35px !important; font-size: 0.85em !important; font-weight: normal !important; color: #666; }
 
     /* Preview Overlay */
     #preview-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
@@ -96,6 +97,24 @@
       <div class="info-list" id="p_info_details"></div>
     </div>
 
+    <div class="group-box vitals-box">
+      <div class="section-title">Vital Signs</div>
+      <div class="vitals-grid">
+        <div class="vital-item"><label>Temp</label><div class="vital-input-card"><input type="number" id="v_temp"> <span>C°</span></div></div>
+        <div class="vital-item"><label>HR</label><div class="vital-input-card"><input type="number" id="v_hr"> <span>bpm</span></div></div>
+        <div class="vital-item"><label>RR</label><div class="vital-input-card"><input type="number" id="v_rr"> <span>bpm</span></div></div>
+        <div class="vital-item">
+            <label>BP</label>
+            <div class="vital-input-card">
+                <input type="number" id="v_bp_s" class="bp-input" placeholder="Sys"> 
+                <span style="margin: 0 4px; font-size: 0.8em; color: #999;">/</span> 
+                <input type="number" id="v_bp_d" class="bp-input" placeholder="Dia">
+                <span style="font-size: 0.8em; margin-left: 4px;">mmHg</span>
+            </div>
+        </div>
+      </div>
+    </div>
+
     <div class="group-box history-box">
       <div class="section-title">Clinical History</div>
       <label>Chief Complain</label><textarea id="h_chief" rows="3"></textarea>
@@ -108,16 +127,6 @@
       <label>Blood Transfusion</label><textarea id="h_blood" rows="2"></textarea>
       <label>Family History</label><textarea id="h_family" rows="3"></textarea>
       <label>Social History</label><textarea id="h_social" rows="4"></textarea>
-    </div>
-
-    <div class="group-box vitals-box">
-      <div class="section-title">Vital Signs</div>
-      <div class="vitals-grid">
-        <div class="vital-item"><label>Temp</label><div class="vital-input-card"><input type="number" id="v_temp"> <span>C°</span></div></div>
-        <div class="vital-item"><label>HR</label><div class="vital-input-card"><input type="number" id="v_hr"> <span>bpm</span></div></div>
-        <div class="vital-item"><label>RR</label><div class="vital-input-card"><input type="number" id="v_rr"> <span>bpm</span></div></div>
-        <div class="vital-item"><label>BP</label><div class="vital-input-card"><input type="number" id="v_bp_s" placeholder="Sys" style="width:40px;"> / <input type="number" id="v_bp_d" placeholder="Dia" style="width:40px;"><span>mmHg</span></div></div>
-      </div>
     </div>
 
     <div class="group-box exam-box">
@@ -206,25 +215,24 @@
     const infoContainer = document.getElementById('p_info_details');
     infoContainer.innerHTML = "";
 
-    // ALL DATA FIELDS - ONE PER LINE
     const fields = [
-      { label: "Name", val: p.name },
-      { label: "Registration No", val: p.regNumber },
-      { label: "Age", val: p.age },
-      { label: "Sex", val: p.sex },
-      { label: "Race", val: p.race },
-      { label: "Religion", val: p.religion },
-      { label: "Blood Group", val: p.bloodGroup },
-      { label: "Occupation", val: p.occupation },
-      { label: "Address", val: p.address },
-      { label: "Next of Kin", val: p.nextOfKin },
-      { label: "Kin Occupation", val: p.kinOccupation },
-      { label: "Kin Phone", val: p.kinPhone }
+      { label: "Name:", val: p.name },
+      { label: "Registration No:", val: p.regNumber },
+      { label: "Age:", val: p.age },
+      { label: "Sex:", val: p.sex },
+      { label: "Race:", val: p.race },
+      { label: "Religion:", val: p.religion },
+      { label: "Blood Group & Rh:", val: p.bloodGroup },
+      { label: "Occupation:", val: p.occupation },
+      { label: "Address:", val: p.address },
+      { label: "Next of Kin:", val: p.nextOfKin },
+      { label: "Kin Occupation:", val: p.kinOccupation },
+      { label: "Kin Phone:", val: p.kinPhone }
     ];
 
     fields.forEach(f => {
       if (f.val) {
-        infoContainer.innerHTML += `<div class="info-row"><span class="info-label">${f.label}:</span><span class="info-value">${f.val}</span></div>`;
+        infoContainer.innerHTML += `<div class="info-row"><span class="info-label">${f.label}</span><span class="info-value">${f.val}</span></div>`;
       }
     });
   }
@@ -249,33 +257,31 @@
     const p = selectedPatient;
     document.getElementById('prev_p_photo').src = p.photo || '';
     
-    // PREVIEW: ONE FIELD PER LINE
     const idFields = [
-      { label: "Full Name", val: p.name },
-      { label: "Reg Number", val: p.regNumber },
-      { label: "Age", val: p.age },
-      { label: "Sex", val: p.sex },
-      { label: "Race", val: p.race },
-      { label: "Religion", val: p.religion },
-      { label: "Blood Group", val: p.bloodGroup },
-      { label: "Occupation", val: p.occupation },
-      { label: "Address", val: p.address },
-      { label: "Next of Kin", val: p.nextOfKin },
-      { label: "Kin Occupation", val: p.kinOccupation },
-      { label: "Kin Phone", val: p.kinPhone },
-      { label: "Visit Info", val: `Visit #${p.currentVisitNo} | ${new Date().toLocaleString()}` }
+      { label: "Full Name:", val: p.name },
+      { label: "Registration No:", val: p.regNumber },
+      { label: "Age:", val: p.age },
+      { label: "Sex:", val: p.sex },
+      { label: "Race:", val: p.race },
+      { label: "Religion:", val: p.religion },
+      { label: "Blood Group & Rh:", val: p.bloodGroup },
+      { label: "Occupation:", val: p.occupation },
+      { label: "Address:", val: p.address },
+      { label: "Next of Kin:", val: p.nextOfKin },
+      { label: "Kin Phone:", val: p.kinPhone },
+      { label: "Visit Info:", val: `Visit #${p.currentVisitNo} | ${new Date().toLocaleString()}` }
     ];
 
     let idHtml = "";
     idFields.forEach(f => {
-       if(f.val) idHtml += `<div class="preview-row"><strong>${f.label}:</strong> <span>${f.val}</span></div>`;
+       if(f.val) idHtml += `<div class="preview-row"><strong>${f.label}</strong> <span>${f.val}</span></div>`;
     });
     document.getElementById('preview-id-section').innerHTML = idHtml;
 
     let html = `
       <div class="preview-section-title">Vital Signs</div>
       <div class="preview-row">
-        <strong>Vitals:</strong> 
+        <strong>Vitals Summary:</strong> 
         <span>Temp: ${document.getElementById('v_temp').value || '--'}° | HR: ${document.getElementById('v_hr').value || '--'} | RR: ${document.getElementById('v_rr').value || '--'} | BP: ${document.getElementById('v_bp_s').value || '--'}/${document.getElementById('v_bp_d').value || '--'}</span>
       </div>
       <div class="preview-section-title">Clinical History</div>
